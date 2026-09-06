@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head></head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile | StallFree</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body data-page="profile">
+    <header id="site-header"></header>
+
+    <main class="container">
+      <div style="margin: 24px 0 20px">
+        <h1>Profile</h1>
+        <p class="tagline">
+          Manage your details and review your buying activity.
+        </p>
+      </div>
+
+      <div class="banner banner-success hidden" id="profile-banner"></div>
+
+      <section class="section">
+        <div class="profile-layout">
+          <div class="card summary-card">
+            <h3 style="margin-bottom: 14px">Your details</h3>
+
+            <div
+              class="banner banner-danger hidden"
+              id="profile-error"
+              style="background: var(--danger-soft); color: var(--danger)"
+            >
+              First name is required.
+            </div>
+
+            <div class="form-group">
+              <label for="p-first">First name *</label>
+              <input
+                type="text"
+                id="p-first"
+                class="input"
+                placeholder="Juan"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="p-last">Last name</label>
+              <input
+                type="text"
+                id="p-last"
+                class="input"
+                placeholder="Dela Cruz"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="p-phone">Phone number</label>
+              <input
+                type="tel"
+                id="p-phone"
+                class="input"
+                placeholder="0917 123 4567"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="p-address">Delivery address</label>
+              <textarea
+                id="p-address"
+                class="textarea"
+                rows="3"
+                placeholder="House no., street, city"
+              ></textarea>
+            </div>
+
+            <button
+              class="btn btn-primary btn-block"
+              onclick="saveProfileForm()"
+            >
+              Save profile
+            </button>
+
+            <p class="muted" style="font-size: 0.78rem; margin-top: 12px">
+              Your saved name and address auto-fill at checkout.
+            </p>
+          </div>
+
+          <div>
+            <h3 style="margin-bottom: 12px">Your stats</h3>
+            <div
+              class="grid sellers-grid"
+              style="
+                grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+              "
+            >
+              <div class="card stat-card">
+                <div class="stat" id="stat-count">0</div>
+                <div class="muted">Orders placed</div>
+              </div>
+              <div class="card stat-card">
+                <div class="stat" id="stat-spent">&#8369;0</div>
+                <div class="muted">Total spent</div>
+              </div>
+              <div class="card stat-card">
+                <div class="stat" id="stat-items">0</div>
+                <div class="muted">Items bought</div>
+              </div>
+            </div>
+
+            <h3 style="margin: 28px 0 12px">Recent orders</h3>
+            <div id="order-history"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
