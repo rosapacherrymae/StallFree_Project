@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home | StallFree</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="home">
+  <header id="site-header"></header>
+
+  <main class="container">
+    <section class="hero">
+      <h1 id="greeting">Discover what local sellers are offering.</h1>
+      <p>Buy directly from community sellers you can trust. Add products to your cart and check out in seconds.</p>
+      <a href="products.html" class="btn btn-outline">Shop now</a>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <h2>Featured products</h2>
+        <a href="products.html" class="btn btn-outline btn-sm">See all</a>
+      </div>
+      <div class="grid products-grid" id="featured-grid"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <h2>Shop by category</h2>
+        <a href="categories.html" class="btn btn-outline btn-sm">All categories</a>
+      </div>
+      <div class="grid categories-grid" id="home-categories"></div>
+    </section>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
