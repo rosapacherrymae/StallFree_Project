@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop handmade gifts &amp; souvenirs | StallFree</title>
+    <meta
+      name="description"
+      content="Search, filter, and sort the full StallFree catalogue of handmade gifts and souvenirs — or open any listing for reviews, seller details, and checkout."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23ff5a1f'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Georgia'>S</text></svg>"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body data-page="products">
+    <header id="site-header"></header>
+
+    <main class="container">
+      <!-- ============ Browse view (no ?id=) ============ -->
+      <div id="browse-page">
+        <div id="browse-crumb"></div>
+
+        <div class="page-head">
+          <div>
+            <h1 id="results-title">All products</h1>
+            <p class="tagline" id="results-sub">
+              Search, filter, and sort the full StallFree catalogue.
+            </p>
+          </div>
+        </div>
+
+        <div class="products-layout">
+          <div class="products-main">
+            <div class="pilters" id="pilters" role="group" aria-label="Quick filters"></div>
+
+            <div class="results-bar">
+              <div class="results-bar-left">
+                <span class="results-count" id="results-count">Loading results…</span>
+              </div>
+              <div class="sort-wrap">
+                <label for="sort-select">Sort by</label>
+                <select id="sort-select" class="select select-sm">
+                  <option value="featured">Featured</option>
+                  <option value="price-asc">Price: low to high</option>
+                  <option value="price-desc">Price: high to low</option>
+                  <option value="rating">Top rated</option>
+                  <option value="reviews">Most reviewed</option>
+                  <option value="popular">Best selling</option>
+                  <option value="name">Name: A-Z</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="active-chips hidden" id="active-chips"></div>
+
+            <div class="grid products-grid" id="products-grid"></div>
+
+            <div class="load-more-wrap">
+              <button type="button" class="btn btn-outline btn-lg hidden" id="load-more">
+                Load more
+              </button>
+            </div>
+
+            <section class="related-searches hidden" id="related-searches" aria-label="Related searches"></section>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ Listing detail view (?id=) ============ -->
+      <div id="product-page" class="hidden"></div>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

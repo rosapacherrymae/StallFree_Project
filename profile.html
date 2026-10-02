@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile | StallFree</title>
+    <meta name="description" content="Manage your details and review your buying activity." />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23ff5a1f'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Georgia'>S</text></svg>"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body data-page="profile">
+    <header id="site-header"></header>
+
+    <main class="container">
+      <div class="page-head">
+        <div>
+          <h1>Your profile</h1>
+          <p class="tagline">
+            Your details auto-fill at checkout. Everything is stored only in this
+            browser.
+          </p>
+        </div>
+        <a href="orders.html" class="btn btn-outline">Your orders</a>
+      </div>
+
+      <div class="banner banner-success hidden" id="profile-banner"></div>
+
+      <div class="profile-layout">
+        <form class="card profile-card" id="profile-form" novalidate>
+          <h3 style="margin-bottom: 14px">Your details</h3>
+
+          <div class="banner hidden" id="profile-error" style="background: var(--danger-soft); color: var(--danger)">
+            First name is required.
+          </div>
+
+          <div class="form-group">
+            <label for="p-first">First name *</label>
+            <input type="text" id="p-first" class="input" placeholder="Juan" autocomplete="given-name" />
+          </div>
+
+          <div class="form-group">
+            <label for="p-last">Last name</label>
+            <input type="text" id="p-last" class="input" placeholder="Dela Cruz" autocomplete="family-name" />
+          </div>
+
+          <div class="form-group">
+            <label for="p-phone">Phone number</label>
+            <input type="tel" id="p-phone" class="input" placeholder="0917 123 4567" autocomplete="tel" />
+          </div>
+
+          <div class="form-group">
+            <label for="p-address">Delivery address</label>
+            <textarea id="p-address" class="textarea" rows="3" placeholder="House no., street, city" autocomplete="street-address"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Save profile</button>
+
+          <p class="muted small" style="margin-top: 12px">
+            Saved name and address auto-fill when you check out.
+          </p>
+        </form>
+
+        <div>
+          <div class="section-header">
+            <h2>Your stats</h2>
+            <a href="wishlist.html" class="link-btn">Saved items →</a>
+          </div>
+
+          <div class="stats-grid">
+            <div class="card stat-card">
+              <div class="stat" id="stat-count">0</div>
+              <div class="muted">Orders placed</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat" id="stat-spent">₱0</div>
+              <div class="muted">Total spent</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat" id="stat-items">0</div>
+              <div class="muted">Items bought</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat" id="stat-wishes">0</div>
+              <div class="muted">Saved items</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat" id="stat-follows">0</div>
+              <div class="muted">Shops followed</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat" id="stat-reviews">0</div>
+              <div class="muted">Reviews written</div>
+            </div>
+          </div>
+
+          <div class="section-header" style="margin-top: 30px">
+            <h2>Recent orders</h2>
+            <a href="orders.html" class="link-btn">See all →</a>
+          </div>
+          <div id="order-history"></div>
+          <div id="history-empty" class="hidden">
+            <div class="empty-state">
+              <h3>No orders yet</h3>
+              <p>When you check out, your orders will show up here.</p>
+              <a href="products.html" class="btn btn-primary" style="margin-top: 16px">Start shopping</a>
+            </div>
+          </div>
+
+          <div class="card" style="padding: 20px; margin-top: 26px">
+            <h3 style="margin-bottom: 6px">Data &amp; privacy</h3>
+            <p class="muted small" style="margin-bottom: 14px">
+              Cart, saved items, orders, reviews, and profile details live in this
+              browser's localStorage. Clearing them cannot be undone.
+            </p>
+            <button type="button" class="btn btn-danger" data-action="clear-data">
+              Delete all local data
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
