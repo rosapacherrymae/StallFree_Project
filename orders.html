@@ -1,85 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Order | StallFree</title>
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body data-page="orders">
-  <header id="site-header"></header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your order | StallFree</title>
+    <meta name="description" content="Review your cart, check out, and track your order history." />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23ff5a1f'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Georgia'>S</text></svg>"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body data-page="orders">
+    <header id="site-header"></header>
 
-  <main class="container">
-    <div style="margin:24px 0 20px">
-      <h1>Your Order</h1>
-      <p class="tagline">Review your cart, check out, and track your order history.</p>
-    </div>
-
-    <div class="banner banner-success hidden" id="order-banner"></div>
-
-    <section class="section">
-      <div class="section-header">
-        <h2>Cart</h2>
-        <span class="muted" id="cart-count"></span>
+    <main class="container">
+      <div class="page-head">
+        <div>
+          <h1>Your order</h1>
+          <p class="tagline">
+            Review your cart, apply a code, check out, and track everything you have
+            bought.
+          </p>
+        </div>
+        <a href="products.html" class="btn btn-outline">Keep shopping</a>
       </div>
 
-      <div class="cart-layout">
-        <div id="cart-list"></div>
+      <div class="banner banner-success hidden" id="order-banner"></div>
 
-        <div>
-          <div class="card summary-card">
-            <h3 style="margin-bottom:8px">Order summary</h3>
-            <div id="cart-summary"></div>
+      <section class="section" id="cart">
+        <div class="section-header">
+          <h2>Cart</h2>
+          <span class="muted" id="cart-count"></span>
+        </div>
 
-            <button class="btn btn-primary btn-block" id="checkout-btn" style="margin-top:14px"
-              onclick="toggleCheckout()">Proceed to checkout</button>
-          </div>
+        <div class="cart-layout">
+          <div id="cart-list"></div>
 
-          <div class="card summary-card hidden" id="checkout-form" style="margin-top:16px">
-            <h3 style="margin-bottom:12px">Checkout details</h3>
-
-            <div class="banner banner-danger hidden" id="checkout-error"
-              style="background:var(--danger-soft);color:var(--danger)">
-              Please complete all required fields.
+          <div>
+            <div class="card summary-card">
+              <h3>Order summary</h3>
+              <div id="cart-summary"></div>
+              <div id="coupon-area" class="hidden"></div>
+              <button
+                type="button"
+                class="btn btn-primary btn-block hidden"
+                id="checkout-btn"
+                style="margin-top: 16px"
+              >
+                Proceed to checkout
+              </button>
             </div>
 
-            <div class="form-group">
-              <label for="co-name">Full name *</label>
-              <input type="text" id="co-name" class="input" placeholder="Juan Dela Cruz">
-              <p class="muted hidden" id="err-name" style="font-size:.78rem;color:var(--danger);margin-top:4px">Name is required.</p>
-            </div>
+            <form class="card checkout-form-card hidden" id="checkout-form" novalidate>
+              <h3>Checkout details</h3>
 
-            <div class="form-group">
-              <label for="co-phone">Phone number *</label>
-              <input type="tel" id="co-phone" class="input" placeholder="0917 123 4567">
-              <p class="muted hidden" id="err-phone" style="font-size:.78rem;color:var(--danger);margin-top:4px">Phone is required.</p>
-            </div>
+              <div class="banner hidden" id="checkout-error" style="background: var(--danger-soft); color: var(--danger); margin-top: 12px">
+                Please complete the highlighted fields.
+              </div>
 
-            <div class="form-group">
-              <label for="co-address">Delivery address *</label>
-              <textarea id="co-address" class="textarea" rows="3" placeholder="House no., street, city"></textarea>
-              <p class="muted hidden" id="err-address" style="font-size:.78rem;color:var(--danger);margin-top:4px">Address is required.</p>
-            </div>
+              <div class="form-group">
+                <label for="co-name">Full name *</label>
+                <input type="text" id="co-name" class="input" placeholder="Juan Dela Cruz" autocomplete="name" />
+                <p class="field-error hidden" id="co-name-error">Please enter your full name.</p>
+              </div>
 
-            <button class="btn btn-primary btn-block" onclick="placeOrder()">Place order</button>
+              <div class="form-group">
+                <label for="co-phone">Phone number *</label>
+                <input type="tel" id="co-phone" class="input" placeholder="0917 123 4567" autocomplete="tel" />
+                <p class="field-error hidden" id="co-phone-error">Enter a valid phone number (at least 7 digits).</p>
+              </div>
+
+              <div class="form-group">
+                <label for="co-address">Delivery address *</label>
+                <textarea id="co-address" class="textarea" rows="3" placeholder="House no., street, city" autocomplete="street-address"></textarea>
+                <p class="field-error hidden" id="co-address-error">Please enter a delivery address.</p>
+              </div>
+
+              <div class="form-group">
+                <label for="co-note">Order note</label>
+                <textarea id="co-note" class="textarea" rows="2" placeholder="Gift message, landmark, safe-space instructions…"></textarea>
+              </div>
+
+              <fieldset class="form-group" style="border: none">
+                <legend class="form-label">Payment method *</legend>
+                <div class="payment-opts">
+                  <label class="payment-opt">
+                    <input type="radio" name="payment" value="Cash on delivery" checked />
+                    <span>Cash on delivery <small>Pay the rider when your parcel arrives</small></span>
+                  </label>
+                  <label class="payment-opt">
+                    <input type="radio" name="payment" value="GCash" />
+                    <span>GCash <small>We will text you a reference number</small></span>
+                  </label>
+                  <label class="payment-opt">
+                    <input type="radio" name="payment" value="Card" />
+                    <span>Card on delivery <small>Debit or credit card at the door</small></span>
+                  </label>
+                </div>
+                <p class="field-error hidden" id="payment-error">Choose a payment method.</p>
+              </fieldset>
+
+              <button type="submit" class="btn btn-primary btn-block" id="place-order">
+                Place order
+              </button>
+              <p class="muted small" style="margin-top: 10px">
+                This is a demo checkout — no real payment is processed and your details
+                never leave this browser.
+              </p>
+            </form>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="section">
-      <div class="section-header">
-        <h2>Order history</h2>
-      </div>
-      <div id="order-history"></div>
-    </section>
-  </main>
+      <section class="section">
+        <div class="section-header">
+          <h2>Order history</h2>
+          <span class="muted small">Newest first</span>
+        </div>
+        <div id="order-history"></div>
+        <div id="history-empty">
+          <div class="empty-state">
+            <div class="empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z" /><path d="M9 8V6a3 3 0 0 1 6 0v2" /></svg>
+            </div>
+            <h3>No orders yet</h3>
+            <p>Orders you place will appear here with their status and delivery date.</p>
+            <a href="products.html" class="btn btn-primary" style="margin-top: 16px">Browse products</a>
+          </div>
+        </div>
+      </section>
+    </main>
 
-  <footer id="site-footer"></footer>
+    <footer id="site-footer"></footer>
 
-  <script src="js/data.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/main.js"></script>
-</body>
+    <script src="js/data.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+  </body>
 </html>

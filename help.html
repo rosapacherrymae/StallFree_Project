@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Help centre | StallFree</title>
+    <meta
+      name="description"
+      content="Delivery, returns, FAQs, and how to open your own stall on StallFree."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23ff5a1f'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Georgia'>S</text></svg>"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body data-page="help">
+    <header id="site-header"></header>
+
+    <main class="container">
+      <div class="page-head">
+        <div>
+          <h1>Help centre</h1>
+          <p class="tagline">
+            Everything about ordering, delivery, returns, and selling on StallFree.
+          </p>
+        </div>
+        <a href="products.html" class="btn btn-outline">Back to shopping</a>
+      </div>
+
+      <section class="section" id="delivery">
+        <div class="section-header"><h2>Delivery</h2></div>
+        <div class="help-grid">
+          <div class="card" style="padding: 20px">
+            <h3>Free delivery over ₱1,000</h3>
+            <p class="muted" style="margin-top: 6px">
+              Orders below ₱1,000 carry a flat ₱75 nationwide fee. Your summary always
+              shows the delivery fee before you confirm the order.
+            </p>
+          </div>
+          <div class="card" style="padding: 20px">
+            <h3>Processing times</h3>
+            <p class="muted" style="margin-top: 6px">
+              Each listing shows its processing time — made-to-order pieces take
+              longer than ready-to-ship ones. Estimated arrival appears on your
+              order after checkout.
+            </p>
+          </div>
+          <div class="card" style="padding: 20px">
+            <h3>Tracking your parcel</h3>
+            <p class="muted" style="margin-top: 6px">
+              Your order status and estimated delivery date live in
+              <a href="orders.html" class="link-btn">Your order</a>. Sellers message
+              you directly if anything changes.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="returns">
+        <div class="section-header"><h2>Returns &amp; replacements</h2></div>
+        <div class="help-grid">
+          <div class="card" style="padding: 20px">
+            <h3>Damaged on arrival?</h3>
+            <p class="muted" style="margin-top: 6px">
+              Message the shop from its storefront page within 3 days of delivery
+              with a photo — verified stalls are required to replace or refund
+              damaged items.
+            </p>
+          </div>
+          <div class="card" style="padding: 20px">
+            <h3>Change of mind</h3>
+            <p class="muted" style="margin-top: 6px">
+              Because most pieces are made to order, returns for change of mind are
+              accepted only when the listing's policy says so. Check the policy row
+              on each shop page.
+            </p>
+          </div>
+          <div class="card" style="padding: 20px">
+            <h3>Buyer protection</h3>
+            <p class="muted" style="margin-top: 6px">
+              If a seller never ships, your order can be cancelled and refunded to
+              your original payment method.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="sell">
+        <div class="section-header"><h2>Open your own stall</h2></div>
+        <div class="card" style="padding: 24px">
+          <p class="muted" style="margin-bottom: 14px">
+            StallFree is built as a front-end demo, so stalls are currently curated.
+            A real launch would follow these four steps:
+          </p>
+          <div class="stats-grid">
+            <div class="card stat-card">
+              <div class="stat">1</div>
+              <div class="muted">Create your shop profile — name, story, and banner.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat">2</div>
+              <div class="muted">List your first items with photos and processing times.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat">3</div>
+              <div class="muted">Set delivery fees and your return policy.</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat">4</div>
+              <div class="muted">Go live and start answering buyer messages.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="faq">
+        <div class="section-header"><h2>Frequently asked questions</h2></div>
+
+        <details class="faq-item">
+          <summary>Is my payment information stored anywhere?</summary>
+          <p>
+            No. This is a fully client-side demo — there is no server, no payment
+            gateway, and nothing is transmitted. Cart, orders, and profile details
+            stay in your browser's localStorage.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Can I use the site without an account?</summary>
+          <p>
+            Yes. Everything works straight away: search, save items, add to cart, and
+            check out. Your profile is optional and only used to pre-fill checkout
+            details.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Do discount codes really work?</summary>
+          <p>
+            Yes — try <b>WELCOME10</b> (10% off), <b>STALL50</b> (₱50 off orders over
+            ₱500), or <b>FREESHIP</b> (waives delivery). Apply them in the cart
+            summary before placing your order.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>Where do the product photos come from?</summary>
+          <p>
+            Listing photos are served from Unsplash and every URL used in this
+            project has been verified. If a photo cannot load, the card falls back to
+            a coloured tile with the item's initial, so nothing ever breaks.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>How do I clear my data?</summary>
+          <p>
+            Open <a href="profile.html" class="link-btn">your profile</a> and use
+            “Delete all local data” at the bottom of the page.
+          </p>
+        </details>
+      </section>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

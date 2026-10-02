@@ -1,43 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home | StallFree</title>
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body data-page="home">
-  <header id="site-header"></header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StallFree — Handmade gifts &amp; souvenirs from local stalls</title>
+    <meta
+      name="description"
+      content="Shop handmade bouquets, photo gifts, keychains, and keepsakes from independent stalls across the Philippines."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23ff5a1f'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Georgia'>S</text></svg>"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body data-page="home">
+    <header id="site-header"></header>
 
-  <main class="container">
-    <section class="hero">
-      <h1 id="greeting">Discover what local sellers are offering.</h1>
-      <p>Buy directly from community sellers you can trust. Add products to your cart and check out in seconds.</p>
-      <a href="products.html" class="btn btn-outline">Shop now</a>
-    </section>
+    <main class="container">
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="hero-eyebrow">Handmade in the Philippines</span>
+          <h1 id="greeting">Gifts with a story, from stalls worth following.</h1>
+          <p>
+            Bouquets, printed memories, keychains, and keepsakes — made to order by
+            independent sellers you can message directly.
+          </p>
 
-    <section class="section">
-      <div class="section-header">
-        <h2>Featured products</h2>
-        <a href="products.html" class="btn btn-outline btn-sm">See all</a>
+          <form class="hero-search" id="hero-search" role="search">
+            <label class="sr-only" for="hero-search-input">Search the marketplace</label>
+            <input
+              type="search"
+              id="hero-search-input"
+              placeholder="Search gifts, bouquets, keychains…"
+              autocomplete="off"
+            />
+            <button type="submit" class="btn btn-primary">Search</button>
+          </form>
+
+          <div class="hero-pills">
+            <a href="products.html?cat=bouquets">Bouquets</a>
+            <a href="products.html?cat=photo-gifts">Photo gifts</a>
+            <a href="products.html?cat=keychains">Keychains</a>
+            <a href="products.html?free=1">Free delivery</a>
+            <a href="products.html?sort=rating">Top rated</a>
+          </div>
+        </div>
+
+        <div class="hero-art" aria-hidden="true">
+          <span class="hero-tile">
+            <img
+              src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=400&amp;q=80&amp;auto=format&amp;fit=crop"
+              alt=""
+              onload="this.classList.add('is-loaded')"
+              onerror="this.remove()"
+            />
+          </span>
+          <span class="hero-tile">
+            <img
+              src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=400&amp;q=80&amp;auto=format&amp;fit=crop"
+              alt=""
+              onload="this.classList.add('is-loaded')"
+              onerror="this.remove()"
+            />
+          </span>
+          <span class="hero-tile">
+            <img
+              src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=400&amp;q=80&amp;auto=format&amp;fit=crop"
+              alt=""
+              onload="this.classList.add('is-loaded')"
+              onerror="this.remove()"
+            />
+          </span>
+          <span class="hero-tile">
+            <img
+              src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=400&amp;q=80&amp;auto=format&amp;fit=crop"
+              alt=""
+              onload="this.classList.add('is-loaded')"
+              onerror="this.remove()"
+            />
+          </span>
+        </div>
+      </section>
+
+      <div class="card value-strip">
+        <div class="shop-policy-row">
+          <span>Buyer protection on every order</span>
+          <span>Free delivery over ₱1,000</span>
+          <span>Verified local stalls only</span>
+          <span>Direct messages to each seller</span>
+        </div>
       </div>
-      <div class="grid products-grid" id="featured-grid"></div>
-    </section>
 
-    <section class="section">
-      <div class="section-header">
-        <h2>Shop by category</h2>
-        <a href="categories.html" class="btn btn-outline btn-sm">All categories</a>
-      </div>
-      <div class="grid categories-grid" id="home-categories"></div>
-    </section>
-  </main>
+      <section class="section" style="margin-top: 34px">
+        <div class="section-header">
+          <div>
+            <h2>Find a gift for the occasion</h2>
+            <p class="section-sub">Tell us the moment — we will pull the right listings.</p>
+          </div>
+          <a href="products.html" class="btn btn-outline btn-sm">Browse everything</a>
+        </div>
+        <div class="occasions-row" id="home-occasions"></div>
+      </section>
 
-  <footer id="site-footer"></footer>
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>Shop by category</h2>
+            <p class="section-sub" id="home-cat-sub">Eight aisles, 34 handmade listings.</p>
+          </div>
+          <a href="categories.html" class="btn btn-outline btn-sm">All categories</a>
+        </div>
+        <div class="grid categories-grid" id="home-categories"></div>
+      </section>
 
-  <script src="js/data.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/main.js"></script>
-</body>
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>Shop by price</h2>
+            <p class="section-sub">Every budget has something handmade in it.</p>
+          </div>
+        </div>
+        <div class="price-tiles" id="home-price"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>Featured finds</h2>
+            <p class="section-sub">Highest-rated pieces on StallFree right now.</p>
+          </div>
+          <a href="products.html?sort=rating" class="btn btn-outline btn-sm">See all</a>
+        </div>
+        <div class="rail-wrap">
+          <button class="rail-btn prev" data-action="rail-prev" data-rail="home-featured" aria-label="Scroll left"></button>
+          <div class="rail" id="home-featured"></div>
+          <button class="rail-btn next" data-action="rail-next" data-rail="home-featured" aria-label="Scroll right"></button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>Top-rated stalls</h2>
+            <p class="section-sub">The highest-rated sellers on StallFree right now.</p>
+          </div>
+          <a href="sellers.html" class="btn btn-outline btn-sm">All shops</a>
+        </div>
+        <div class="grid sellers-grid" id="home-shops"></div>
+      </section>
+
+      <section class="section" id="home-recent-section">
+        <div class="section-header">
+          <div>
+            <h2>Pick up where you left off</h2>
+            <p class="section-sub">Recently viewed listings.</p>
+          </div>
+          <a href="products.html" class="btn btn-outline btn-sm">Browse more</a>
+        </div>
+        <div class="rail-wrap">
+          <button class="rail-btn prev" data-action="rail-prev" data-rail="home-recent" aria-label="Scroll left"></button>
+          <div class="rail" id="home-recent"></div>
+          <button class="rail-btn next" data-action="rail-next" data-rail="home-recent" aria-label="Scroll right"></button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>Deals worth a second look</h2>
+            <p class="section-sub">Sale prices and small-budget gifts under ₱350.</p>
+          </div>
+          <a href="products.html?price=u250" class="btn btn-outline btn-sm">Shop deals</a>
+        </div>
+        <div class="rail-wrap">
+          <button class="rail-btn prev" data-action="rail-prev" data-rail="home-deals" aria-label="Scroll left"></button>
+          <div class="rail" id="home-deals"></div>
+          <button class="rail-btn next" data-action="rail-next" data-rail="home-deals" aria-label="Scroll right"></button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>New in the market</h2>
+            <p class="section-sub">Fresh listings and best sellers this week.</p>
+          </div>
+          <a href="products.html?sort=popular" class="btn btn-outline btn-sm">Best selling</a>
+        </div>
+        <div class="rail-wrap">
+          <button class="rail-btn prev" data-action="rail-prev" data-rail="home-new" aria-label="Scroll left"></button>
+          <div class="rail" id="home-new"></div>
+          <button class="rail-btn next" data-action="rail-next" data-rail="home-new" aria-label="Scroll right"></button>
+        </div>
+      </section>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+  </body>
 </html>
