@@ -19,7 +19,7 @@
 
     <main class="container auth-wrap">
       <section class="card auth-card">
-        <span class="auth-badge" aria-hidden="true">S</span>
+        <img class="auth-badge" src="asset/StallFree%20Market%20Stall%20Logo.png" alt="StallFree logo" width="88" height="88" />
         <h1 class="auth-title">Create your account</h1>
         <p class="muted small auth-sub">
           One account keeps your cart, orders, and saved stalls together in this browser.
@@ -35,7 +35,7 @@
               id="rg-name"
               class="input"
               placeholder="Juan Dela Cruz"
-              autocomplete="name"
+              autocomplete="name" required
             />
             <p class="field-error hidden" id="rg-name-error"></p>
           </div>
@@ -47,7 +47,7 @@
               id="rg-email"
               class="input"
               placeholder="you@email.com"
-              autocomplete="email"
+              autocomplete="email" required
             />
             <p class="field-error hidden" id="rg-email-error"></p>
           </div>
@@ -59,7 +59,7 @@
               id="rg-password"
               class="input"
               placeholder="At least 8 characters"
-              autocomplete="new-password"
+              autocomplete="new-password" required
             />
             <button type="button" class="link-btn pw-toggle" data-toggle-password="rg-password" aria-pressed="false">Show</button>
             <p class="field-error hidden" id="rg-password-error"></p>
@@ -73,10 +73,22 @@
               id="rg-confirm"
               class="input"
               placeholder="Type it again"
-              autocomplete="new-password"
+              autocomplete="new-password" required
             />
             <button type="button" class="link-btn pw-toggle" data-toggle-password="rg-confirm" aria-pressed="false">Show</button>
             <p class="field-error hidden" id="rg-confirm-error"></p>
+          </div>
+
+          <div class="form-group">
+            <label for="rg-phone">Phone number *</label>
+            <input type="tel" id="rg-phone" class="input" autocomplete="tel" inputmode="tel" placeholder="09123456789" required aria-describedby="rg-phone-error" />
+            <p class="field-error hidden" id="rg-phone-error"></p>
+          </div>
+
+          <div class="form-group">
+            <label for="rg-address">Delivery address *</label>
+            <textarea id="rg-address" class="textarea" autocomplete="street-address" rows="3" placeholder="House/street, barangay, city, province, postal code" required aria-describedby="rg-address-error"></textarea>
+            <p class="field-error hidden" id="rg-address-error"></p>
           </div>
 
           <button type="submit" class="btn btn-primary btn-block" id="register-btn">

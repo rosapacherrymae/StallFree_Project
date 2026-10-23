@@ -140,10 +140,14 @@ function renderHeader(activePage) {
   const initial = signedIn && acct.firstName ? acct.firstName.charAt(0).toUpperCase() : 'S';
   const accountLabel = signedIn && acct.firstName ? sanitize(acct.firstName) : 'Sign in';
 
+  const selectedCategory = activePage === 'products'
+    ? new URLSearchParams(window.location.search).get('cat') || ''
+    : '';
+
   const catLinks = categories
     .map(
       (c) =>
-        `<a href="products.html?cat=${encodeURIComponent(c.id)}" class="cat-link">${sanitize(c.name)}</a>`
+        `<a href="products.html?cat=${encodeURIComponent(c.id)}" class="cat-link ${selectedCategory === c.id ? 'active' : ''}" ${selectedCategory === c.id ? 'aria-current="page"' : ''}>${sanitize(c.name)}</a>`
     )
     .join('');
 
@@ -174,8 +178,8 @@ function renderHeader(activePage) {
     <div class="header-main container">
       <button class="icon-btn nav-toggle" data-action="toggle-nav" aria-label="Toggle menu" aria-expanded="false" aria-controls="header-cats-nav">${ICONS.menu}</button>
       <a href="index.html" class="logo" aria-label="StallFree home">
-        <span class="logo-badge">S</span>
-        <span class="logo-text">Stall<em>Free</em></span>
+        <img class="logo-badge" src="asset/StallFree%20Market%20Stall%20Logo.png" alt="" width="54" height="54" /><span class="logo-text">Stall<em>Free</em></span>
+        
       </a>
 
       <form class="search" id="site-search-form" role="search" autocomplete="off">
@@ -212,7 +216,7 @@ function renderHeader(activePage) {
 
     <nav class="header-cats" id="header-cats-nav" aria-label="Browse the marketplace">
       <div class="container cats-row" id="header-cats">
-        <a href="products.html" class="cat-link ${activePage === 'products' ? 'active' : ''}">All products</a>
+        <a href="products.html" class="cat-link ${activePage === 'products' && !selectedCategory ? 'active' : ''}" ${activePage === 'products' && !selectedCategory ? 'aria-current="page"' : ''}>All products</a>
         <a href="sellers.html" class="cat-link ${activePage === 'sellers' || activePage === 'shop' ? 'active' : ''}">Shops</a>
         ${catLinks}
         <a href="help.html#sell" class="cat-link">Open a stall</a>
@@ -227,7 +231,7 @@ function renderFooter() {
   return `
     <div class="container footer-grid">
       <div class="footer-brand">
-        <a href="index.html" class="logo"><span class="logo-badge">S</span><span class="logo-text">Stall<em>Free</em></span></a>
+        <a href="index.html" class="logo"><img class="logo-badge" src="asset/StallFree%20Market%20Stall%20Logo.png" alt="" width="54" height="54" /><span class="logo-text">Stall<em>Free</em></span></a>
         <p>Handmade gifts, souvenirs, and small-batch finds from independent stalls across the Philippines.</p>
         <form class="newsletter" id="newsletter-form" novalidate>
           <label class="sr-only" for="newsletter-email">Email address</label>
@@ -1119,9 +1123,7 @@ function bindGlobalRouter() {
       case 'signout':
         closeAccountMenu();
         logoutAccount();
-        refreshAccountChrome();
-        toast('Signed out — your profile, orders, and saved items stay in your account', 'success');
-        if (typeof onAuthChange === 'function') onAuthChange();
+        window.location.replace('index.html');
         break;
       case 'clear-searches':
         clearRecentSearches();

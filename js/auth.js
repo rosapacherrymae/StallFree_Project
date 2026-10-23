@@ -346,11 +346,13 @@ function appendAudit(action, detail) {
 
 /* ---------------- Registration ---------------- */
 
-async function registerAccount(input) {
+async function registerAccount(input, options = {}) {
   const name = String(input.name || '').trim();
   const email = String(input.email || '').trim();
   const password = String(input.password || '');
   const confirm = String(input.confirm || '');
+  const phone = String(input.phone || '').trim();
+  const address = String(input.address || '').trim();
 
   if (!name) return { ok: false, field: 'name', message: 'Enter your full name.' };
   if (!isValidEmail(email)) {
@@ -365,6 +367,13 @@ async function registerAccount(input) {
     return { ok: false, field: 'email', message: 'An account with that email already exists.' };
   }
 
+  if (options.requireDelivery !== false) {
+    if (phone.replace(/\D/g, '').length < 7 || !/^[+\d\s().-]+$/.test(phone)) {
+      return { ok: false, field: 'phone', message: 'Enter a valid phone number (at least 7 digits).' };
+    }
+    if (!address) return { ok: false, field: 'address', message: 'Enter your delivery address.' };
+  }
+
   const { firstName, lastName } = splitName(name);
   const secretHash = await hashWithNewSalt(password);
 
@@ -375,6 +384,8 @@ async function registerAccount(input) {
     name,
     firstName,
     lastName,
+    phone,
+    address,
     salt: secretHash.salt,
     hash: secretHash.hash,
     iterations: secretHash.iterations,
@@ -393,6 +404,9 @@ async function registerAccount(input) {
 
   startSession(acct);
   if (typeof adoptGuestData === 'function') adoptGuestData(acct.id, acct);
+  if (typeof saveProfile === 'function') {
+    saveProfile({ firstName, lastName, fullName: name, email, phone, address });
+  }
   return { ok: true, account: publicAccount(acct) };
 }
 
@@ -507,7 +521,7 @@ async function adminSetup(input) {
     email: input.email,
     password: input.password,
     confirm: input.confirm
-  });
+  }, { requireDelivery: false });
   if (!result.ok) return result;
 
   const acct = findAccountById(result.account.id);

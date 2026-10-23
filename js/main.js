@@ -394,26 +394,20 @@ function pilterState(key) {
   return Boolean(filters[group]);
 }
 
+function resetQuickFilters() {
+  Object.assign(filters, {
+    price: "all", min: "", max: "", rating: "0",
+    free: false, instock: false, top: false, badge: false,
+  });
+}
+
 function togglePilter(key) {
-  const [group, value] = key.split(":");
-  if (group === "price") {
-    filters.price = filters.price === value ? "all" : value;
-    if (filters.price !== "custom") {
-      filters.min = "";
-      filters.max = "";
-    }
-  } else if (group === "rating") {
-    filters.rating = filters.rating === value ? "0" : value;
-  } else if (group === "free") {
-    filters.free = !filters.free;
-  } else if (group === "top") {
-    filters.top = !filters.top;
-  } else if (group === "badge") {
-    filters.badge = !filters.badge;
-  } else if (group === "instock") {
-    filters.instock = !filters.instock;
-  } else {
-    return;
+  if (!PILTERS.some((p) => p.key === key)) return;
+  const wasActive = pilterState(key);
+  resetQuickFilters();
+  if (!wasActive) {
+    const [group, value] = key.split(":");
+    filters[group] = value || true;
   }
   applyFilters();
 }
@@ -438,6 +432,7 @@ function renderPilters() {
 /* how many results that pill would show on its own — the honesty cue Etsy uses */
 function pilterCount(key) {
   const snapshot = { ...filters };
+  resetQuickFilters();
   const [group, value] = key.split(":");
 
   if (group === "price") {
@@ -1708,7 +1703,6 @@ function renderWishlist() {
     ? items
         .map((p) => {
           const available = isListable(p);
-          const soldOut = productStock(p.id) <= 0;
           const card = available
             ? productCard(p)
             : `<article class="card product-card is-soldout" data-product="${sanitize(p.id)}">
@@ -1722,15 +1716,6 @@ function renderWishlist() {
       <div class="wish-item">
         ${card}
         <div class="wish-actions">
-          ${
-            available
-              ? `<button class="btn btn-sm btn-primary btn-block" data-action="add-cart" data-id="${
-                  p.id
-                }" ${soldOut ? 'disabled aria-disabled="true"' : ""}>${ICONS.bag} ${
-                  soldOut ? "Sold out" : "Add to cart"
-                }</button>`
-              : ""
-          }
           <button class="btn btn-sm btn-outline btn-block" data-action="unsave" data-id="${p.id}">Remove</button>
         </div>
       </div>`;
@@ -2895,7 +2880,7 @@ function initRegister() {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    ["rg-name", "rg-email", "rg-password", "rg-confirm"].forEach((id) =>
+    ["rg-name", "rg-email", "rg-password", "rg-confirm", "rg-phone", "rg-address"].forEach((id) =>
       setAuthFieldError(id, ""),
     );
     setAuthBanner("register-banner", "");
@@ -2908,6 +2893,8 @@ function initRegister() {
         email: (document.getElementById("rg-email") || {}).value || "",
         password: (document.getElementById("rg-password") || {}).value || "",
         confirm: (document.getElementById("rg-confirm") || {}).value || "",
+        phone: (document.getElementById("rg-phone") || {}).value || "",
+        address: (document.getElementById("rg-address") || {}).value || "",
       });
       if (!result.ok) {
         if (result.field)
