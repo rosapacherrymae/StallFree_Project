@@ -7,7 +7,14 @@
 const PHOTO_BASE = 'https://images.unsplash.com/';
 
 function photoUrl(id, w = 600) {
-  return PHOTO_BASE + id + '?w=' + w + '&q=80&auto=format&fit=crop';
+  const value = String(id || '').trim();
+  const url =
+    /^https?:\/\//i.test(value) || /^data:image\//i.test(value)
+      ? value
+      : PHOTO_BASE + value + '?w=' + w + '&q=80&auto=format&fit=crop';
+  /* the URL is interpolated into an HTML attribute; remove characters that
+     could break out of it, even though only admins can supply a custom value */
+  return url.replace(/[<>"']/g, '');
 }
 
 /* Four 4:5 crops of the same shot stand in for a full listing gallery.
@@ -16,8 +23,13 @@ function photoUrl(id, w = 600) {
 const GALLERY_CROPS = ['entropy', 'top', 'bottom', 'left'];
 
 function galleryPhotos(id, count = 4) {
-  return GALLERY_CROPS.slice(0, Math.max(1, count)).map(
-    (crop) => `${PHOTO_BASE}${id}?w=800&h=1000&q=80&auto=format&fit=crop&crop=${crop}`
+  const wanted = Math.max(1, count);
+  const value = String(id || '').trim();
+  if (/^https?:\/\//i.test(value) || /^data:image\//i.test(value)) {
+    return Array.from({ length: wanted }, () => photoUrl(value));
+  }
+  return GALLERY_CROPS.slice(0, wanted).map(
+    (crop) => `${PHOTO_BASE}${value}?w=800&h=1000&q=80&auto=format&fit=crop&crop=${crop}`
   );
 }
 
@@ -2435,6 +2447,12 @@ function priceBandCount(band) {
 
 /* ================= Lookup helpers ================= */
 
+/* archived or removed listings stay in the catalogue for admin/history
+   purposes but never appear in storefront lists */
+function isListable(product) {
+  return Boolean(product) && !product.archived && !product.removed;
+}
+
 function findCategory(id) {
   return categories.find((c) => c.id === id) || null;
 }
@@ -2454,11 +2472,11 @@ function findCoupon(code) {
 }
 
 function productsBySeller(sellerId) {
-  return products.filter((p) => p.sellerId === sellerId);
+  return products.filter((p) => p.sellerId === sellerId && isListable(p));
 }
 
 function productsByCategory(categoryId) {
-  return products.filter((p) => p.categoryId === categoryId);
+  return products.filter((p) => p.categoryId === categoryId && isListable(p));
 }
 
 function sellerRating(sellerId) {
@@ -2484,6 +2502,7 @@ function searchProducts(query) {
   const q = String(query || '').trim().toLowerCase();
   if (!q) return [];
   return products.filter((p) => {
+    if (!isListable(p)) return false;
     const cat = findCategory(p.categoryId);
     const shop = findSeller(p.sellerId);
     const haystack = [

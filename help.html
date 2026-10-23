@@ -28,6 +28,11 @@
         <a href="products.html" class="btn btn-outline">Back to shopping</a>
       </div>
 
+      <div class="banner demo-banner" role="note" id="help-demo-disclaimer">
+        <b>StallFree is a frontend-only demonstration.</b> Accounts, orders and payments
+        are simulated and stored in this browser. No real payment or delivery is processed.
+      </div>
+
       <section class="section" id="delivery">
         <div class="section-header"><h2>Delivery</h2></div>
         <div class="help-grid">
@@ -47,11 +52,31 @@
             </p>
           </div>
           <div class="card" style="padding: 20px">
-            <h3>Tracking your parcel</h3>
+            <h3>Tracking your order</h3>
             <p class="muted" style="margin-top: 6px">
-              Your order status and estimated delivery date live in
-              <a href="orders.html" class="link-btn">Your order</a>. Sellers message
-              you directly if anything changes.
+              Your simulated order status and estimated delivery date live in
+              <a href="orders.html" class="link-btn">Your order</a>. An administrator can
+              advance the demo status; no courier is contacted.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="payments">
+        <div class="section-header"><h2>Payment methods</h2></div>
+        <div class="help-grid">
+          <div class="card" style="padding: 20px">
+            <h3>Cash on delivery (demo)</h3>
+            <p class="muted" style="margin-top: 6px">
+              Choose this option to simulate paying a rider on arrival. No rider, parcel,
+              charge, or delivery is real in this demo.
+            </p>
+          </div>
+          <div class="card" style="padding: 20px">
+            <h3>GCash (demo)</h3>
+            <p class="muted" style="margin-top: 6px">
+              A simulated payment choice only. No gateway is contacted, no reference
+              number is sent, and no money moves.
             </p>
           </div>
         </div>
@@ -77,12 +102,28 @@
             </p>
           </div>
           <div class="card" style="padding: 20px">
-            <h3>Buyer protection</h3>
+            <h3>Buyer protection (demo)</h3>
             <p class="muted" style="margin-top: 6px">
-              If a seller never ships, your order can be cancelled and refunded to
-              your original payment method.
+              In a real marketplace this would trigger a refund process. Here the order
+              simply changes to Cancelled and stock is released in local demo data.
             </p>
           </div>
+        </div>
+      </section>
+
+      <section class="section" id="privacy">
+        <div class="section-header"><h2>Privacy</h2></div>
+        <div class="card" style="padding: 24px">
+          <p class="muted" style="margin-bottom: 12px">
+            StallFree is a front-end demo that runs entirely in your browser. In plain terms:
+          </p>
+          <ul class="muted" style="margin-left: 20px; line-height: 1.9">
+            <li>Accounts, carts, orders, and profiles are stored in this browser's localStorage — never on a server.</li>
+            <li>Passwords are salted and hashed; the plain text is never stored.</li>
+            <li>Payment details are not collected: checkout records only your chosen payment method.</li>
+            <li>Deleting your browser data (or using “Delete all local data” on the profile page) removes everything.</li>
+            <li>Nothing is transmitted to any third party — product photos are the only external requests.</li>
+          </ul>
         </div>
       </section>
 
@@ -160,12 +201,58 @@
             “Delete all local data” at the bottom of the page.
           </p>
         </details>
+
+        <details class="faq-item">
+          <summary>Who can access the administrator dashboard?</summary>
+          <p>
+            Exactly one administrator can be created, through the one-time setup on
+            <a href="admin.html" class="link-btn">admin.html</a> in a fresh browser
+            profile. All public sign-ups are customers. This is a UI/data-integrity rule
+            only: anyone with developer tools can edit browser storage, so it is not real
+            security.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>How do I see or change my review?</summary>
+          <p>
+            Reviews appear on the product page and are saved only in this browser for the
+            account (or guest session) that wrote them. Your own review is marked
+            <b>Your review</b> and has an <b>Edit review</b> link that updates it in place
+            instead of adding a duplicate. Switching accounts hides other accounts'
+            reviews and edits. There is no moderation service or shared review database.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>How do orders and status updates work in this demo?</summary>
+          <p>
+            Checking out creates a saved demo order for the signed-in account (or the
+            guest session) and shows it under <a href="orders.html" class="link-btn">Your
+            order</a>. The administrator can move the order through the demo statuses —
+            placed, confirmed, preparing, shipped and delivered — and any change appears
+            on the customer's history after a reload. No courier is contacted and no real
+            shipping progress is invented.
+          </p>
+        </details>
+
+        <details class="faq-item">
+          <summary>How do I reset the demo or back it up?</summary>
+          <p>
+            The administrator dashboard can export a JSON backup of demo orders and
+            catalogue edits; account passwords are never exported. To reset this
+            browser completely, use “Delete all local data” on your profile and then
+            clear this site's browser storage. Deleting browser data also deletes local
+            demo accounts and orders and cannot be undone.
+          </p>
+        </details>
       </section>
     </main>
 
     <footer id="site-footer"></footer>
 
     <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>

@@ -5,14 +5,15 @@
    (no inline handlers, no quoting bugs).
    ===================================================================== */
 
+/* Topbar = site-level quick links only. Personal shortcuts (saved items,
+   orders, profile) live in the account menu and header icons, and the single
+   "Shops" button lives in the category row below (so it also works in the
+   mobile menu). */
 const NAV_LINKS = [
   { page: 'home', label: 'Home', href: 'index.html' },
-  { page: 'products', label: 'Shop', href: 'products.html' },
+  { page: 'products', label: 'Products', href: 'products.html' },
   { page: 'categories', label: 'Categories', href: 'categories.html' },
-  { page: 'sellers', label: 'Shops', href: 'sellers.html' },
-  { page: 'wishlist', label: 'Saved', href: 'wishlist.html' },
-  { page: 'orders', label: 'Your order', href: 'orders.html' },
-  { page: 'profile', label: 'Profile', href: 'profile.html' }
+  { page: 'help', label: 'Help', href: 'help.html' }
 ];
 
 /* ---------------- Icons (inline SVG, stroke = currentColor) ---------------- */
@@ -42,8 +43,6 @@ const ICONS = {
     '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3 1-5.2A8 8 0 1 1 21 12z"/></svg>',
   pin:
     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>',
-  filter:
-    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>',
   chevronLeft:
     '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg>',
   chevronRight:
@@ -55,6 +54,11 @@ const ICONS = {
   arrowUp:
     '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>'
 };
+
+/* Mandatory visible demo disclaimer. Keep this exact sentence on checkout,
+   order receipts, help and the README. */
+const DEMO_DISCLAIMER =
+  'StallFree is a frontend-only demonstration. Accounts, orders and payments are simulated and stored in this browser. No real payment or delivery is processed.';
 
 /* ---------------- Helpers ---------------- */
 
@@ -131,10 +135,10 @@ function renderTopbar() {
 }
 
 function renderHeader(activePage) {
-  const profile = getProfile();
-  const initial = profile && profile.firstName ? profile.firstName.charAt(0).toUpperCase() : 'S';
-  const accountLabel =
-    profile && profile.firstName ? sanitize(profile.firstName) : 'Sign in';
+  const acct = getSessionAccount();
+  const signedIn = Boolean(acct);
+  const initial = signedIn && acct.firstName ? acct.firstName.charAt(0).toUpperCase() : 'S';
+  const accountLabel = signedIn && acct.firstName ? sanitize(acct.firstName) : 'Sign in';
 
   const catLinks = categories
     .map(
@@ -143,9 +147,32 @@ function renderHeader(activePage) {
     )
     .join('');
 
+  const menuLinks = `
+    <a href="profile.html">${ICONS.user} My profile</a>
+    <a href="orders.html">${ICONS.bag} My orders &amp; tracking</a>
+    <a href="wishlist.html">${ICONS.heart} Saved items</a>
+    <a href="sellers.html">${ICONS.pin} Followed shops</a>
+    <a href="profile.html#address">${ICONS.truck} Delivery addresses</a>
+    <a href="profile.html#settings">${ICONS.shield} Account settings</a>`;
+
+  const adminLink = isAdmin()
+    ? `<a href="admin.html" class="account-admin-link">${ICONS.spark} Admin dashboard</a>`
+    : '';
+
+  const accountMenu = signedIn
+    ? `<p class="account-menu-title">My StallFree</p>
+       ${menuLinks}
+       ${adminLink}
+       <span class="account-menu-sep" role="presentation"></span>
+       <button class="account-signout" data-action="signout">Sign out</button>`
+    : `<p class="account-menu-title">Welcome to StallFree</p>
+       <a href="login.html" class="btn btn-primary btn-block account-signin">Sign in</a>
+       <a href="register.html" class="account-register">Create an account</a>
+       ${menuLinks}`;
+
   return `
     <div class="header-main container">
-      <button class="icon-btn nav-toggle" data-action="toggle-nav" aria-label="Toggle menu" aria-expanded="false">${ICONS.menu}</button>
+      <button class="icon-btn nav-toggle" data-action="toggle-nav" aria-label="Toggle menu" aria-expanded="false" aria-controls="header-cats-nav">${ICONS.menu}</button>
       <a href="index.html" class="logo" aria-label="StallFree home">
         <span class="logo-badge">S</span>
         <span class="logo-text">Stall<em>Free</em></span>
@@ -162,24 +189,12 @@ function renderHeader(activePage) {
 
       <div class="header-actions">
         <div class="account">
-          <button class="icon-btn account-btn" data-action="toggle-account" aria-expanded="false" aria-haspopup="true">
+          <button class="icon-btn account-btn" data-action="toggle-account" aria-expanded="false" aria-haspopup="true" aria-controls="account-menu">
             <span class="avatar">${initial}</span>
             <span class="account-label">${accountLabel}</span>
           </button>
           <div class="account-menu hidden" id="account-menu">
-            <p class="account-menu-title">${profile && profile.firstName ? 'My StallFree' : 'Welcome to StallFree'}</p>
-            ${
-              profile && profile.firstName
-                ? `<button class="btn btn-outline btn-block account-signout" data-action="signout">Sign out of ${sanitize(
-                    profile.firstName
-                  )}</button>`
-                : `<button class="btn btn-primary btn-block account-signin" data-action="signin">Sign in or register</button>`
-            }
-            <a href="profile.html">${ICONS.user} Profile &amp; details</a>
-            <a href="orders.html">${ICONS.bag} Your orders</a>
-            <a href="wishlist.html">${ICONS.heart} Saved items</a>
-            <a href="sellers.html">${ICONS.pin} Followed shops</a>
-            <a href="help.html">${ICONS.shield} Help centre</a>
+            ${accountMenu}
           </div>
         </div>
 
@@ -188,18 +203,18 @@ function renderHeader(activePage) {
           <span class="badge hidden" id="wishlist-badge">0</span>
         </a>
 
-        <a href="orders.html" class="icon-btn" id="nav-cart" aria-label="Your order">
+        <a href="orders.html" class="icon-btn" id="nav-cart" aria-label="Your cart and orders" title="Your cart and orders">
           ${ICONS.cart}
           <span class="badge hidden" id="cart-badge">0</span>
         </a>
       </div>
     </div>
 
-    <nav class="header-cats" aria-label="Shop by category">
+    <nav class="header-cats" id="header-cats-nav" aria-label="Browse the marketplace">
       <div class="container cats-row" id="header-cats">
         <a href="products.html" class="cat-link ${activePage === 'products' ? 'active' : ''}">All products</a>
-        ${catLinks}
         <a href="sellers.html" class="cat-link ${activePage === 'sellers' || activePage === 'shop' ? 'active' : ''}">Shops</a>
+        ${catLinks}
         <a href="help.html#sell" class="cat-link">Open a stall</a>
       </div>
     </nav>`;
@@ -239,6 +254,8 @@ function renderFooter() {
           <li><a href="help.html#sell">Open a stall</a></li>
           <li><a href="help.html#delivery">Delivery info</a></li>
           <li><a href="help.html#returns">Returns</a></li>
+          <li><a href="help.html#payments">Payment methods</a></li>
+          <li><a href="help.html#privacy">Privacy</a></li>
         </ul>
       </div>
 
@@ -255,13 +272,14 @@ function renderFooter() {
 
     <div class="container footer-bottom">
       <span>&copy; ${year} StallFree · Built with HTML, CSS &amp; JavaScript.</span>
-      <span>All data stays in your browser (localStorage).</span>
+      <span>Demo build — accounts and orders are stored in this browser only.</span>
     </div>`;
 }
 
 /* ---------------- Bootstrap ---------------- */
 
 let currentPage = 'home';
+let sharedUIReady = false;
 
 function initSharedUI(activePage) {
   currentPage = activePage || 'home';
@@ -269,14 +287,35 @@ function initSharedUI(activePage) {
   const header = document.getElementById('site-header');
   const footer = document.getElementById('site-footer');
 
+  /* guard: this must only ever build the chrome once per page, or the
+     topbar and every listener end up doubled on re-entry */
+  if (sharedUIReady) {
+    refreshAccountChrome();
+    refreshCartBadge();
+    refreshWishlistBadge();
+    return;
+  }
+  sharedUIReady = true;
+
   if (header) {
     header.classList.add('site-header');
     header.innerHTML = renderHeader(currentPage);
+    document.querySelectorAll('.topbar').forEach((bar) => bar.remove());
     header.insertAdjacentHTML('beforebegin', renderTopbar());
   }
   if (footer) {
     footer.classList.add('site-footer');
     footer.innerHTML = renderFooter();
+  }
+
+  /* accessibility: one skip link per page, pointing at the main landmark */
+  const mainEl = document.querySelector('main');
+  if (mainEl) {
+    if (!mainEl.id) mainEl.id = 'main-content';
+    document.body.insertAdjacentHTML(
+      'afterbegin',
+      `<a class="skip-link" href="#${mainEl.id}">Skip to main content</a>`
+    );
   }
 
   /* floating chrome */
@@ -344,6 +383,20 @@ function bindChrome() {
       toast('You are on the list!', 'success');
     });
   }
+
+  /* show/hide password controls are shared by login, register, profile and
+     the one-time admin setup form */
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-toggle-password]');
+    if (!btn) return;
+    const field = document.getElementById(btn.dataset.togglePassword);
+    if (!field) return;
+    if (!btn.dataset.label) btn.dataset.label = btn.textContent.trim() || 'Show';
+    const showing = field.type === 'text';
+    field.type = showing ? 'password' : 'text';
+    btn.textContent = showing ? btn.dataset.label : 'Hide';
+    btn.setAttribute('aria-pressed', String(!showing));
+  });
 
   /* close popovers when clicking or pressing Escape elsewhere */
   document.addEventListener('click', (e) => {
@@ -421,12 +474,6 @@ function syncWishButtons(productId) {
   document
     .querySelectorAll(`[data-action="fav"][data-id="${productId}"]`)
     .forEach((btn) => paintFavButton(btn, wished));
-}
-
-function syncAllWishButtons() {
-  document.querySelectorAll('[data-action="fav"][data-id]').forEach((btn) => {
-    paintFavButton(btn, isWished(btn.dataset.id));
-  });
 }
 
 /* ---------------- Toast ---------------- */
@@ -525,9 +572,11 @@ function productCard(p) {
   const cat = findCategory(p.categoryId);
   const wished = isWished(p.id);
   const colors = categoryColors(p.categoryId);
+  const left = productStock(p.id);
+  const soldOut = left <= 0;
 
   return `
-    <article class="card product-card" data-product="${p.id}">
+    <article class="card product-card${soldOut ? ' is-soldout' : ''}" data-product="${p.id}">
       <div class="pc-media" style="${gradient(colors)}">
         <a class="pc-link" href="${productHref(p)}" aria-label="${sanitize(p.name)}">
           <span class="pc-letter" aria-hidden="true">${sanitize(p.name.charAt(0))}</span>
@@ -535,6 +584,13 @@ function productCard(p) {
                onload="this.classList.add('is-loaded')" onerror="this.remove()" />
         </a>
         ${badgeMarkup(p)}
+        ${
+          soldOut
+            ? '<span class="pc-stock pc-stock-out">Sold out</span>'
+            : left <= 5
+              ? `<span class="pc-stock pc-stock-low">Only ${left} left</span>`
+              : ''
+        }
         <button class="pc-fav ${wished ? 'is-wished' : ''}" data-action="fav" data-id="${p.id}"
           data-name="${sanitize(p.name)}" aria-pressed="${wished}" aria-label="Save ${sanitize(p.name)}">
           ${wished ? ICONS.heart : ICONS.heartOutline}
@@ -555,8 +611,9 @@ function productCard(p) {
         <p class="pc-ship ${p.freeShipping ? '' : 'muted'}">${
           p.freeShipping ? ICONS.truck + ' Free delivery' : 'Delivery calculated at checkout'
         }</p>
-        <button class="btn btn-primary btn-sm pc-add" data-action="add-cart" data-id="${p.id}">
-          ${ICONS.bag} Add to cart
+        <button class="btn btn-primary btn-sm pc-add" data-action="add-cart" data-id="${p.id}"
+          ${soldOut ? 'disabled aria-disabled="true"' : ''}>
+          ${ICONS.bag} ${soldOut ? 'Sold out' : 'Add to cart'}
         </button>
       </div>
     </article>`;
@@ -565,8 +622,9 @@ function productCard(p) {
 function compactCard(p) {
   const wished = isWished(p.id);
   const colors = categoryColors(p.categoryId);
+  const soldOut = productStock(p.id) <= 0;
   return `
-    <article class="card product-card product-card-compact" data-product="${p.id}">
+    <article class="card product-card product-card-compact${soldOut ? ' is-soldout' : ''}" data-product="${p.id}">
       <div class="pc-media" style="${gradient(colors)}">
         <a class="pc-link" href="${productHref(p)}" aria-label="${sanitize(p.name)}">
           <span class="pc-letter" aria-hidden="true">${sanitize(p.name.charAt(0))}</span>
@@ -574,6 +632,7 @@ function compactCard(p) {
                onload="this.classList.add('is-loaded')" onerror="this.remove()" />
         </a>
         ${badgeMarkup(p)}
+        ${soldOut ? '<span class="pc-stock pc-stock-out">Sold out</span>' : ''}
         <button class="pc-fav ${wished ? 'is-wished' : ''}" data-action="fav" data-id="${p.id}"
           data-name="${sanitize(p.name)}" aria-pressed="${wished}" aria-label="Save ${sanitize(p.name)}">
           ${wished ? ICONS.heart : ICONS.heartOutline}
@@ -628,7 +687,7 @@ function shopCard(s) {
   const rating = sellerRating(s.id);
   const following = isFollowing(s.id);
   return `
-    <article class="card shop-card" data-shop="${s.id}">
+    <article class="card shop-card${following ? ' is-following' : ''}" data-shop="${s.id}">
       <div class="shop-cover" style="${gradient(s.colors)}">
         <img src="${photoUrl(s.cover, 480)}" alt="" loading="lazy"
              onload="this.classList.add('is-loaded')" onerror="this.remove()" />
@@ -662,12 +721,21 @@ function reviewCard(r) {
           <strong>${sanitize(r.author)}</strong>
           <div class="review-meta">${ratingLine(r.rating)} <span class="muted">${sanitize(
             r.date
-          )}</span></div>
+          )}${r.edited ? ' · edited' : ''}</span></div>
         </div>
         ${r.mine ? '<span class="chip chip-accent">Your review</span>' : ''}
       </div>
       ${r.title ? `<h4 class="review-title">${sanitize(r.title)}</h4>` : ''}
       <p class="review-text">${sanitize(r.text)}</p>
+      ${
+        r.mine && r.id
+          ? `<div class="review-actions">
+               <button type="button" class="link-btn" data-action="review-edit" data-id="${sanitize(
+                 r.id
+               )}">Edit review</button>
+             </div>`
+          : ''
+      }
     </article>`;
 }
 
@@ -703,6 +771,52 @@ function breadcrumb(parts) {
   return `<nav class="breadcrumb" aria-label="Breadcrumb"><ol>${items}</ol></nav>`;
 }
 
+/* ---------------- Duplicate-render guards ---------------- */
+
+/* drop repeat ids so a bad dataset can never produce doubled cards */
+function dedupeById(list) {
+  const seen = new Set();
+  return (list || []).filter((item) => {
+    if (!item || item.id == null || seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+}
+
+const RENDER_CONTAINERS = [
+  '#sellers-grid',
+  '#home-shops',
+  '#products-grid',
+  '#shop-grid',
+  '#wishlist-grid',
+  '#pdp-related',
+  '#categories-grid',
+  '#home-categories'
+];
+
+/* regression aid: warns when any list container holds the same id twice */
+function auditDuplicateCards(context) {
+  const dupes = [];
+  RENDER_CONTAINERS.forEach((selector) => {
+    document.querySelectorAll(selector).forEach((container) => {
+      const seen = new Map();
+      container
+        .querySelectorAll(':scope > [data-product], :scope > [data-shop], :scope > .wish-item [data-product]')
+        .forEach((el) => {
+          const key = el.hasAttribute('data-product') ? 'product:' + el.dataset.product : 'shop:' + el.dataset.shop;
+          seen.set(key, (seen.get(key) || 0) + 1);
+        });
+      seen.forEach((count, key) => {
+        if (count > 1) dupes.push(selector + ' ' + key + ' x' + count);
+      });
+    });
+  });
+  if (dupes.length && typeof console !== 'undefined') {
+    console.warn('[StallFree] duplicate cards (' + context + '):', dupes);
+  }
+  return dupes;
+}
+
 /* ---------------- Quick view ---------------- */
 
 function quickView(productId) {
@@ -711,6 +825,7 @@ function quickView(productId) {
   const shop = findSeller(p.sellerId);
   const cat = findCategory(p.categoryId);
   const wished = isWished(p.id);
+  const soldOut = productStock(p.id) <= 0;
 
   openModal(`
     <div class="qv">
@@ -729,7 +844,10 @@ function quickView(productId) {
           p.freeShipping ? 'Free delivery' : 'Delivery fee at checkout'
         } · ${sanitize(p.processing)}</p>
         <div class="qv-actions">
-          <button class="btn btn-primary" data-action="add-cart" data-id="${p.id}">${ICONS.bag} Add to cart</button>
+          <button class="btn btn-primary" data-action="add-cart" data-id="${p.id}"
+            ${soldOut ? 'disabled aria-disabled="true"' : ''}>${ICONS.bag} ${
+              soldOut ? 'Sold out' : 'Add to cart'
+            }</button>
           <button class="btn btn-outline pc-fav-inline ${wished ? 'is-wished' : ''}" data-action="fav"
             data-id="${p.id}" data-name="${sanitize(p.name)}" aria-pressed="${wished}"
             aria-label="Save ${sanitize(p.name)}">${wished ? ICONS.heart : ICONS.heartOutline}</button>
@@ -893,11 +1011,6 @@ function highlightSuggestion(index) {
   }
 }
 
-function searchBoxValue() {
-  const input = document.getElementById('site-search');
-  return input ? input.value.trim() : '';
-}
-
 /* preserve the active filters when the header search is used */
 function currentSearchUrl(query) {
   const params = new URLSearchParams();
@@ -997,20 +1110,18 @@ function bindGlobalRouter() {
         break;
       case 'signin':
         closeAccountMenu();
-        openSigninModal();
+        window.location.href = 'login.html';
+        break;
+      case 'register':
+        closeAccountMenu();
+        window.location.href = 'register.html';
         break;
       case 'signout':
         closeAccountMenu();
-        confirmDialog(
-          'Sign out?',
-          'Your cart, saved items, and orders stay in this browser — only the name in the header is cleared.',
-          'Sign out',
-          () => {
-            saveProfile(null);
-            refreshAccountChrome();
-            toast('Signed out', 'success');
-          }
-        );
+        logoutAccount();
+        refreshAccountChrome();
+        toast('Signed out — your profile, orders, and saved items stay in your account', 'success');
+        if (typeof onAuthChange === 'function') onAuthChange();
         break;
       case 'clear-searches':
         clearRecentSearches();
@@ -1031,6 +1142,8 @@ function bindGlobalRouter() {
             btn.textContent = following ? 'Following' : 'Follow shop';
             btn.classList.toggle('btn-outline', following);
             btn.classList.toggle('btn-primary', !following);
+            const card = btn.closest('.shop-card');
+            if (card) card.classList.toggle('is-following', following);
           });
         if (typeof onFollowChange === 'function') onFollowChange(id, following);
         toast(following ? 'You are now following this shop' : 'Shop unfollowed', 'success');
@@ -1085,17 +1198,17 @@ function openMessageModal(sellerId) {
 /* ---------------- Sign in / out ---------------- */
 
 function refreshAccountChrome() {
-  const profile = getProfile();
-  const signedIn = Boolean(profile && profile.firstName);
-  const initial = signedIn ? profile.firstName.charAt(0).toUpperCase() : 'S';
-  const label = signedIn ? sanitize(profile.firstName) : 'Sign in';
+  const acct = getSessionAccount();
+  const signedIn = Boolean(acct);
+  const initial = signedIn && acct.firstName ? acct.firstName.charAt(0).toUpperCase() : 'S';
+  const label = signedIn && acct.firstName ? sanitize(acct.firstName) : 'Sign in';
 
   const avatar = document.querySelector('.account-btn .avatar');
   const accountLabel = document.querySelector('.account-label');
   if (avatar) avatar.textContent = initial;
   if (accountLabel) accountLabel.textContent = label;
 
-  /* rebuild the dropdown so the CTA flips between sign in / sign out */
+  /* rebuild the dropdown so sign-in / sign-out / admin links stay truthful */
   const menu = document.getElementById('account-menu');
   if (menu) {
     const temp = document.createElement('div');
@@ -1103,67 +1216,4 @@ function refreshAccountChrome() {
     const fresh = temp.querySelector('#account-menu');
     if (fresh) menu.innerHTML = fresh.innerHTML;
   }
-}
-
-function openSigninModal() {
-  const existing = getProfile();
-  openModal(`
-    <div class="modal-pad signin">
-      <span class="signin-badge" aria-hidden="true">S</span>
-      <h3>${existing && existing.firstName ? 'Update your details' : 'Welcome to StallFree'}</h3>
-      <p class="muted small" style="margin:6px 0 18px">
-        Sign in to get a personal greeting, a faster checkout, and your name on reviews.
-        No password needed — this demo keeps everything in your browser.
-      </p>
-      <form id="signin-form" novalidate>
-        <div class="form-group">
-          <label for="si-name">First name *</label>
-          <input type="text" id="si-name" class="input" placeholder="Juan" autocomplete="given-name"
-            value="${sanitize((existing && existing.firstName) || '')}" />
-          <p class="field-error hidden" id="si-name-error">Please enter your first name.</p>
-        </div>
-        <div class="form-group">
-          <label for="si-email">Email (optional)</label>
-          <input type="email" id="si-email" class="input" placeholder="you@email.com" autocomplete="email"
-            value="${sanitize((existing && existing.email) || '')}" />
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">${existing && existing.firstName ? 'Save details' : 'Sign in'}</button>
-      </form>
-      <p class="muted small signin-note">Your details never leave this browser.</p>
-    </div>`);
-
-  const nameInput = document.getElementById('si-name');
-  if (nameInput) nameInput.focus();
-
-  const form = document.getElementById('signin-form');
-  if (!form) return;
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const error = document.getElementById('si-name-error');
-    const first = nameInput ? nameInput.value.trim() : '';
-    if (!first) {
-      if (error) error.classList.remove('hidden');
-      if (nameInput) nameInput.focus();
-      return;
-    }
-    if (error) error.classList.add('hidden');
-
-    const emailInput = document.getElementById('si-email');
-    const email = emailInput ? emailInput.value.trim() : '';
-    const last = (existing && existing.lastName) || '';
-
-    saveProfile({
-      firstName: first,
-      lastName: last,
-      fullName: [first, last].filter(Boolean).join(' '),
-      email,
-      phone: (existing && existing.phone) || '',
-      address: (existing && existing.address) || ''
-    });
-
-    refreshAccountChrome();
-    closeModal();
-    toast(`Welcome, ${first}!`, 'success');
-    if (typeof onProfileChange === 'function') onProfileChange();
-  });
 }
