@@ -2944,6 +2944,7 @@ async function testPurchaseSimulation() {
     await testStorefrontDiscovery();
     await testPurchaseSimulation();
     await testOrderHistoryAndAccountFeatures();
+    await testAdminPanelsAndGuards();
   } catch (e) {
     console.error('\nTEST RUN ABORTED:', e && e.stack ? e.stack : e);
   }
@@ -3529,5 +3530,592 @@ async function testOrderHistoryAndAccountFeatures() {
   );
   check('help: page errors clean', helpDom.getErrors().length === 0, helpDom.getErrors().join(' | '));
   helpDom.window.close();
+}
+
+/* ---------------- 20. Admin panels, consistency and destructive guards ---------------- */
+
+async function testAdminPanelsAndGuards() {
+  console.log('\n[20] admin panels, storefront consistency, destructive guards');
+
+  /* ---------- Seed two customers and three orders ---------- */
+  const seedDom = await openPage('orders.html');
+  const sw = seedDom.window;
+  const sd = seedDom.window.document;
+
+  const mara = await sw.registerAccount({
+    name: 'Mara Santos',
+    email: 'mara.admin@example.com',
+    password: 'password1',
+    confirm: 'password1'
+  });
+  check('admin 06: customer A registers', mara.ok === true);
+  const maraSessionRaw = sw.localStorage.getItem('stallfree_session');
+
+  const placeOrder = async (productId, name, phone, address) => {
+    const before = new Set(sw.getAllOrders().map((o) => o.id));
+    sw.addToCart(productId, 1);
+    sw.toggleCheckout();
+    sd.getElementById('co-name').value = name;
+    sd.getElementById('co-phone').value = phone;
+    sd.getElementById('co-address').value = address;
+    submit(sd, 'checkout-form');
+    const found = await waitFor(
+      () => {
+        const list = sw.getAllOrders();
+        return (
+          list.find(
+            (o) =>
+              !before.has(o.id) &&
+              (o.items || []).some((item) => item.productId === productId)
+          ) || null
+        );
+      },
+      8000
+    );
+    /* A real browser reloads the confirmation page after checkout; jsdom
+       stays put, so restore the submit button the reload would have reset. */
+    const placeBtn = sd.getElementById('place-order');
+    if (found && placeBtn) {
+      placeBtn.disabled = false;
+      placeBtn.textContent = 'Place order';
+    }
+    return found;
+  };
+
+  const order1 = await placeOrder('grand-yellow-rose-bouquet', 'Mara Santos', '09171110001', '1 Sampaguita St, QC');
+  const order2 = await placeOrder('sweetheart-hand-bouquet', 'Mara Santos', '09171110001', '1 Sampaguita St, QC');
+  check('admin 06: customer A has two orders', Boolean(order1 && order2));
+  if (!order1 || !order2) {
+    seedDom.window.close();
+    return;
+  }
+
+  sw.logoutAccount();
+  const dee = await sw.registerAccount({
+    name: 'Dee Lim',
+    email: 'dee.admin@example.com',
+    password: 'password2',
+    confirm: 'password2'
+  });
+  check('admin 06: customer B registers', dee.ok === true);
+  const order3 = await placeOrder('mini-rose-bunch', 'Dee Lim', '09172220002', '2 Mabini St, Makati');
+  check('admin 06: customer B has an order', Boolean(order3));
+  if (!order3) {
+    seedDom.window.close();
+    return;
+  }
+
+  const seed = dumpStorage(seedDom);
+  seedDom.window.close();
+  delete seed.stallfree_session;
+
+  /* ---------- Admin bootstrap with existing customer/order data ---------- */
+  const adminDom = await openPage('admin.html', '', seed);
+  const aw = adminDom.window;
+  const ad = aw.document;
+
+  ad.getElementById('as-key').value = ADMIN_SETUP_PASSPHRASE;
+  ad.getElementById('as-name').value = 'QA Owner';
+  ad.getElementById('as-email').value = 'qa-owner@example.com';
+  ad.getElementById('as-password').value = 'adminpass1';
+  ad.getElementById('as-confirm').value = 'adminpass1';
+  submit(ad, 'admin-setup-form');
+  check('admin 06: bootstrap creates the sole administrator', (await waitFor(() => aw.isAdmin(), 15000)) === true);
+  check('admin 06: six tabs are preserved', ad.querySelectorAll('#admin-tabs .tab').length === 6);
+
+  const adminAccount = aw.getSessionAccount();
+  const overviewStats = () =>
+    Array.from(ad.querySelectorAll('#admin-panel .stat-card .stat')).map((el) =>
+      el.textContent.trim()
+    );
+
+  /* ---------- Overview uses stored records and says it is a demo ---------- */
+  let stats = overviewStats();
+  check('admin 06: overview counts all saved orders', stats[0] === '3');
+  check('admin 06: overview counts the two local customers', stats[5] === '2');
+  check(
+    'admin 06: overview live product count matches the catalogue',
+    stats[3] === String(aw.eval('dedupeById(products).filter(isListable).length'))
+  );
+  check(
+    'admin 06: overview shop count matches the catalogue',
+    stats[4] === String(aw.eval('sellers.length'))
+  );
+  check(
+    'admin 06: overview marks figures as a local demo',
+    /Local demo/i.test(ad.getElementById('admin-panel').textContent) &&
+      /Simulation only/i.test(ad.getElementById('admin-panel').textContent)
+  );
+  check(
+    'admin 06: recent activity lists the newest saved order',
+    ad.getElementById('admin-panel').textContent.indexOf(order3.id) !== -1
+  );
+
+  /* ---------- Orders: search, detail, transitions, confirmation ---------- */
+  ad.querySelector('#admin-tabs .tab[data-tab="orders"]').click();
+  await wait(30);
+  const orderSearch = ad.getElementById('admin-order-search');
+  orderSearch.value = order1.id;
+  orderSearch.dispatchEvent(new aw.Event('input', { bubbles: true }));
+  check('admin 06: order search narrows to one record', ad.querySelectorAll('.admin-order').length === 1);
+
+  ad.querySelector('.admin-order [data-admin-view]').click();
+  const detailText = ad.getElementById('modal-root').textContent;
+  check(
+    'admin 06: order detail shows customer and item snapshots',
+    detailText.indexOf('Mara Santos') !== -1 &&
+      detailText.indexOf('Grand Yellow Rose Bouquet') !== -1 &&
+      detailText.indexOf(order1.id) !== -1
+  );
+  check(
+    'admin 06: order detail shows totals and status history',
+    detailText.indexOf(aw.formatPrice(order1.total)) !== -1 &&
+      /Status history/i.test(detailText) &&
+      /Demo record/i.test(detailText)
+  );
+  aw.closeModal();
+
+  const cancelCard = ad.querySelector('.admin-order');
+  const cancelSelect = cancelCard.querySelector('.admin-status-select');
+  cancelSelect.value = 'cancelled';
+  cancelCard.querySelector('[data-admin-save]').click();
+  check(
+    'admin 06: cancelling an order asks for confirmation first',
+    aw.getOrderById(order1.id).status === 'placed' && Boolean(ad.getElementById('confirm-yes'))
+  );
+  ad.getElementById('confirm-yes').click();
+  await wait(30);
+  check('admin 06: confirmed cancellation updates the saved order', aw.getOrderById(order1.id).status === 'cancelled');
+  check(
+    'admin 06: cancellation releases reserved stock once',
+    aw.productStock('grand-yellow-rose-bouquet') === aw.stockBaseline('grand-yellow-rose-bouquet')
+  );
+
+  const orderSearch2 = ad.getElementById('admin-order-search');
+  orderSearch2.value = order2.id;
+  orderSearch2.dispatchEvent(new aw.Event('input', { bubbles: true }));
+  let card = ad.querySelector('.admin-order');
+  const offeredStatuses = Array.from(card.querySelectorAll('.admin-status-select option')).map((o) => o.value);
+  check(
+    'admin 06: status picker offers only current and allowed next statuses',
+    offeredStatuses.includes('placed') &&
+      !offeredStatuses.includes('shipped') &&
+      !offeredStatuses.includes('delivered')
+  );
+  const staleSelect = card.querySelector('.admin-status-select');
+  const injected = ad.createElement('option');
+  injected.value = 'delivered';
+  injected.textContent = 'Delivered (stale option)';
+  staleSelect.appendChild(injected);
+  staleSelect.value = 'delivered';
+  card.querySelector('[data-admin-save]').click();
+  await wait(30);
+  check(
+    'admin 06: stale invalid status jump is refused with a visible error',
+    aw.getOrderById(order2.id).status === 'placed' &&
+      !ad.getElementById('admin-banner').classList.contains('hidden') &&
+      /cannot move/i.test(ad.getElementById('admin-banner').textContent)
+  );
+
+  card = ad.querySelector('.admin-order');
+  card.querySelector('.admin-status-select').value = 'confirmed';
+  card.querySelector('[data-admin-save]').click();
+  await wait(30);
+  check('admin 06: valid status transition is saved', aw.getOrderById(order2.id).status === 'confirmed');
+
+  ['preparing'].forEach((status) => aw.adminUpdateOrder(order2.id, { status }));
+  aw.adminUpdateOrder(order2.id, {
+    status: 'shipped',
+    tracking: { number: 'QA-TRACK-1', courier: 'Demo Courier' }
+  });
+  aw.adminUpdateOrder(order2.id, { status: 'out_for_delivery' });
+  const delivered = aw.adminUpdateOrder(order2.id, { status: 'delivered' });
+  check('admin 06: full lifecycle reaches delivered', delivered.ok === true && delivered.order.status === 'delivered');
+
+  ad.querySelector('#admin-tabs .tab[data-tab="overview"]').click();
+  await wait(30);
+  stats = overviewStats();
+  check(
+    'admin 06: overview revenue reflects only the delivered demo order',
+    ad.getElementById('admin-panel').textContent.indexOf(aw.formatPrice(order2.total)) !== -1
+  );
+  check('admin 06: pending count excludes cancelled and delivered orders', stats[1] === '1');
+
+  const afterStatusSeed = dumpStorage(adminDom);
+  afterStatusSeed.stallfree_session = maraSessionRaw;
+  const customerOrder = await openPage('orders.html', '?id=' + encodeURIComponent(order2.id), afterStatusSeed);
+  const customerOrderText = customerOrder.window.document.getElementById('order-mount').textContent;
+  check(
+    'admin 06: customer history shows the admin status change',
+    /Delivered/i.test(customerOrderText)
+  );
+  check(
+    'admin 06: customer history shows the demo tracking reference',
+    customerOrderText.indexOf('QA-TRACK-1') !== -1 && /Demo Courier/i.test(customerOrderText)
+  );
+  check(
+    'admin 06: customer order view remains demo-labelled',
+    /demo order|frontend-only demonstration/i.test(customerOrderText)
+  );
+  check('admin 06: customer order view errors clean', customerOrder.getErrors().length === 0, customerOrder.getErrors().join(' | '));
+  customerOrder.window.close();
+
+  /* ---------- Products: referenced listings, validation, storefront ---------- */
+  ad.querySelector('#admin-tabs .tab[data-tab="products"]').click();
+  await wait(30);
+  const productSearch = ad.getElementById('admin-product-search');
+  productSearch.value = 'Grand Yellow Rose';
+  productSearch.dispatchEvent(new aw.Event('input', { bubbles: true }));
+  let productRow = ad.querySelector('[data-product-row="grand-yellow-rose-bouquet"]');
+  check('admin 06: product search finds the referenced listing', Boolean(productRow));
+  check(
+    'admin 06: referenced listing shows an order count',
+    Boolean(productRow) && /1 order/i.test(productRow.textContent)
+  );
+  check(
+    'admin 06: referenced listing offers archive instead of permanent delete',
+    Boolean(productRow) &&
+      Boolean(productRow.querySelector('[data-admin-archive]')) &&
+      !productRow.querySelector('[data-admin-remove]')
+  );
+
+  productRow.querySelector('[data-admin-archive]').click();
+  ad.getElementById('confirm-yes').click();
+  await wait(30);
+  check('admin 06: archive removes the listing from public visibility', aw.isListable(aw.findProduct('grand-yellow-rose-bouquet')) === false);
+
+  const archivedSeed = dumpStorage(adminDom);
+  const archivedPdp = await openPage('products.html', '?id=grand-yellow-rose-bouquet', archivedSeed);
+  check(
+    'admin 06: archived product detail fails softly',
+    /moved on|no longer available/i.test(archivedPdp.window.document.getElementById('product-page').textContent)
+  );
+  check('admin 06: archived detail errors clean', archivedPdp.getErrors().length === 0, archivedPdp.getErrors().join(' | '));
+  archivedPdp.window.close();
+
+  archivedSeed.stallfree_session = maraSessionRaw;
+  const snapshotOrder = await openPage('orders.html', '?id=' + encodeURIComponent(order1.id), archivedSeed);
+  check(
+    'admin 06: archiving keeps the historical order snapshot intact',
+    snapshotOrder.window.document.getElementById('order-mount').textContent.indexOf('Grand Yellow Rose Bouquet') !== -1
+  );
+  snapshotOrder.window.close();
+
+  const showHidden = ad.getElementById('admin-show-hidden');
+  showHidden.checked = true;
+  showHidden.dispatchEvent(new aw.Event('change', { bubbles: true }));
+  await wait(30);
+  productRow = ad.querySelector('[data-product-row="grand-yellow-rose-bouquet"]');
+  check('admin 06: archived listing remains available for restore', Boolean(productRow));
+  productRow.querySelector('[data-admin-restore]').click();
+  await wait(30);
+  check('admin 06: restore keeps the same product id', aw.isListable(aw.findProduct('grand-yellow-rose-bouquet')) === true);
+
+  aw.openProductEditor('sweetheart-hand-bouquet');
+  ad.getElementById('pe-compare').value = '100';
+  submit(ad, 'pe-form');
+  check(
+    'admin 06: compare-at below the selling price is rejected inline',
+    !ad.getElementById('pe-compare-error').classList.contains('hidden') &&
+      /higher/i.test(ad.getElementById('pe-compare-error').textContent) &&
+      aw.findProduct('sweetheart-hand-bouquet').price === 650
+  );
+  ad.getElementById('pe-name').value = '   ';
+  submit(ad, 'pe-form');
+  check(
+    'admin 06: empty product name is rejected inline',
+    !ad.getElementById('pe-name-error').classList.contains('hidden')
+  );
+  ad.getElementById('pe-name').value = 'Sweetheart Hand Bouquet';
+  ad.getElementById('pe-compare').value = '';
+  ad.getElementById('pe-price').value = '777';
+  submit(ad, 'pe-form');
+  await wait(30);
+  check('admin 06: valid product edit saves', aw.findProduct('sweetheart-hand-bouquet').price === 777);
+
+  const editedSeed = dumpStorage(adminDom);
+  const editedPdp = await openPage('products.html', '?id=sweetheart-hand-bouquet', editedSeed);
+  check(
+    'admin 06: edited price reaches the storefront',
+    editedPdp.window.document.getElementById('product-page').textContent.indexOf(aw.formatPrice(777)) !== -1
+  );
+  check('admin 06: edited storefront errors clean', editedPdp.getErrors().length === 0, editedPdp.getErrors().join(' | '));
+  editedPdp.window.close();
+
+  aw.openProductCreator();
+  submit(ad, 'pc-form');
+  check(
+    'admin 06: product creator validates required fields',
+    !ad.getElementById('pc-name-error').classList.contains('hidden') &&
+      !ad.getElementById('pc-price-error').classList.contains('hidden')
+  );
+  ad.getElementById('pc-name').value = 'QA Test Candle';
+  ad.getElementById('pc-price').value = '321';
+  ad.getElementById('pc-stock').value = '5';
+  submit(ad, 'pc-form');
+  const created = await waitFor(() =>
+    aw.eval("dedupeById(products).find((p) => p.name === 'QA Test Candle')")
+  );
+  check('admin 06: product creator saves a live listing', Boolean(created));
+
+  if (created) {
+    const createdSeed = dumpStorage(adminDom);
+    const createdBrowse = await openPage('products.html', '?q=' + encodeURIComponent('QA Test Candle'), createdSeed);
+    check(
+      'admin 06: created product appears in storefront search',
+      createdBrowse.window.document.getElementById('products-grid').textContent.indexOf('QA Test Candle') !== -1
+    );
+    createdBrowse.window.close();
+
+    ad.querySelector('#admin-tabs .tab[data-tab="products"]').click();
+    const createdSearch = ad.getElementById('admin-product-search');
+    createdSearch.value = 'QA Test Candle';
+    createdSearch.dispatchEvent(new aw.Event('input', { bubbles: true }));
+    const createdRow = ad.querySelector('[data-product-row="' + created.id + '"]');
+    check('admin 06: unreferenced custom product offers delete', Boolean(createdRow && createdRow.querySelector('[data-admin-remove]')));
+    if (createdRow) {
+      createdRow.querySelector('[data-admin-remove]').click();
+      ad.getElementById('confirm-yes').click();
+      await wait(30);
+      check('admin 06: unreferenced custom product deletes', !aw.findProduct(created.id));
+    }
+  }
+
+  const owned = aw.addCustomProduct({
+    name: 'Referenced QA Item',
+    price: 111,
+    stock: 2,
+    categoryId: 'home',
+    sellerId: 'clay-kiln',
+    description: 'A temporary referenced listing'
+  });
+  check('admin 06: referenced test product created', owned.ok === true);
+  if (owned.ok) {
+    aw.addToCart(owned.product.id, 1);
+    const refOrder = aw.createOrder(
+      { name: 'QA Owner', phone: '09170000000', address: 'QA desk' },
+      { clientToken: 'qa-ref-' + Date.now() }
+    );
+    check('admin 06: referenced test product has a saved order', refOrder.ok === true);
+    const refused = aw.removeProduct(owned.product.id);
+    check(
+      'admin 06: deleting a referenced custom product is refused',
+      refused.ok === false && /archive/i.test(refused.error) && Boolean(aw.findProduct(owned.product.id))
+    );
+    const directRefused = aw.deleteCustomProduct(owned.product.id);
+    check(
+      'admin 06: the low-level custom delete is guarded as well',
+      directRefused.ok === false && Boolean(aw.findProduct(owned.product.id))
+    );
+    const refSearch = ad.getElementById('admin-product-search');
+    if (refSearch) {
+      refSearch.value = 'Referenced QA Item';
+      refSearch.dispatchEvent(new aw.Event('input', { bubbles: true }));
+      const refRow = ad.querySelector('[data-product-row="' + owned.product.id + '"]');
+      check(
+        'admin 06: referenced custom row offers no delete action',
+        Boolean(refRow && refRow.querySelector('[data-admin-archive]') && !refRow.querySelector('[data-admin-remove]'))
+      );
+    }
+  }
+
+  /* ---------- Price/compare-at guard at the storage layer ---------- */
+  const compareProduct = aw.eval(
+    'dedupeById(products).find((p) => isListable(p) && Number(p.compareAt) > 0)'
+  );
+  if (compareProduct) {
+    const priceBefore = aw.findProduct(compareProduct.id).price;
+    const collided = aw.saveCatalogOverride(compareProduct.id, {
+      price: Number(compareProduct.compareAt)
+    });
+    check(
+      'admin 06: storage refuses a price that reaches the compare-at value',
+      collided.ok === false &&
+        /higher than the selling price/i.test(collided.error) &&
+        aw.findProduct(compareProduct.id).price === priceBefore
+    );
+  }
+
+  /* ---------- Shops: validation + linked catalogue consistency ---------- */  ad.querySelector('#admin-tabs .tab[data-tab="shops"]').click();
+  await wait(30);
+  let shopCard = ad.querySelector('[data-shop="bloom-petals"]');
+  shopCard.querySelector('.admin-shop-name').value = 'Bloom & Petals QA';
+  shopCard.querySelector('[data-admin-shop-save]').click();
+  await wait(30);
+  check('admin 06: shop edit saves supported fields', aw.findSeller('bloom-petals').storeName === 'Bloom & Petals QA');
+
+  shopCard = ad.querySelector('[data-shop="bloom-petals"]');
+  shopCard.querySelector('.admin-shop-name').value = '   ';
+  shopCard.querySelector('[data-admin-shop-save]').click();
+  await wait(30);
+  check(
+    'admin 06: empty shop name is rejected without changing the record',
+    aw.findSeller('bloom-petals').storeName === 'Bloom & Petals QA' &&
+      /cannot be empty/i.test(ad.getElementById('admin-banner').textContent)
+  );
+
+  const shopSeed = dumpStorage(adminDom);
+  const shopBrowse = await openPage('products.html', '?q=' + encodeURIComponent('Grand Yellow Rose'), shopSeed);
+  check(
+    'admin 06: shop edit flows through to linked product cards',
+    shopBrowse.window.document.getElementById('products-grid').textContent.indexOf('Bloom & Petals QA') !== -1
+  );
+  shopBrowse.window.close();
+
+  /* ---------- Customers: search, suspend, delete, sole-admin guard ---------- */
+  ad.querySelector('#admin-tabs .tab[data-tab="customers"]').click();
+  await wait(30);
+  check(
+    'admin 06: the sole administrator is not listed as a customer',
+    ad.getElementById('admin-panel').textContent.indexOf(adminAccount.email) === -1
+  );
+
+  const customerSearch = ad.getElementById('admin-customer-search');
+  customerSearch.value = 'mara.admin@example.com';
+  customerSearch.dispatchEvent(new aw.Event('input', { bubbles: true }));
+  check('admin 06: customer search finds the account', ad.querySelectorAll('[data-account]').length === 1);
+
+  let maraRow = ad.querySelector('[data-account]');
+  maraRow.querySelector('[data-admin-suspend="on"]').click();
+  ad.getElementById('confirm-yes').click();
+  await wait(30);
+  check(
+    'admin 06: suspend requires confirmation and is stored',
+    aw.listAccounts().find((a) => a.id === mara.account.id).suspended === true
+  );
+
+  const suspendedSeed = dumpStorage(adminDom);
+  delete suspendedSeed.stallfree_session;
+  const suspendedLogin = await openPage('login.html', '', suspendedSeed);
+  const blockedLogin = await suspendedLogin.window.loginAccount({
+    email: 'mara.admin@example.com',
+    password: 'password1'
+  });
+  check('admin 06: suspended customer cannot sign in', blockedLogin.ok === false);
+  suspendedLogin.window.close();
+
+  maraRow = ad.querySelector('[data-account]');
+  maraRow.querySelector('[data-admin-suspend="off"]').click();
+  await wait(30);
+  check(
+    'admin 06: reactivate restores the customer account',
+    aw.listAccounts().find((a) => a.id === mara.account.id).suspended === false
+  );
+
+  const deeSearch = ad.getElementById('admin-customer-search');
+  deeSearch.value = 'dee.admin@example.com';
+  deeSearch.dispatchEvent(new aw.Event('input', { bubbles: true }));
+  const deeRow = ad.querySelector('[data-account]');
+  check('admin 06: second customer is searchable', Boolean(deeRow));
+  if (deeRow) {
+    deeRow.querySelector('[data-admin-delete]').click();
+    ad.getElementById('confirm-yes').click();
+    await wait(30);
+  }
+  check('admin 06: customer removal deletes only the account', !aw.findAccountById(dee.account.id));
+  check(
+    'admin 06: customer removal keeps their saved order history',
+    Boolean(aw.getAllOrders().find((o) => o.id === order3.id))
+  );
+
+  ad.querySelector('#admin-tabs .tab[data-tab="orders"]').click();
+  await wait(30);
+  const removedOrderSearch = ad.getElementById('admin-order-search');
+  removedOrderSearch.value = order3.id;
+  removedOrderSearch.dispatchEvent(new aw.Event('input', { bubbles: true }));
+  check(
+    'admin 06: admin can still see a removed customer order',
+    ad.getElementById('admin-panel').textContent.indexOf(order3.id) !== -1
+  );
+
+  check(
+    'admin 06: sole administrator cannot be suspended',
+    aw.setAccountSuspended(adminAccount.id, true).ok === false
+  );
+  check(
+    'admin 06: sole administrator cannot be deleted',
+    aw.deleteAccount(adminAccount.id).ok === false
+  );
+
+  /* ---------- Audit log: mutation records with timestamps + IDs ---------- */
+  ad.querySelector('#admin-tabs .tab[data-tab="audit"]').click();
+  await wait(30);
+  const log = aw.readAuditLog();
+  const actions = log.map((entry) => entry.action);
+  check('admin 06: audit log records admin mutations', actions.length > 0);
+  check(
+    'admin 06: audit entries carry an id, actor, action and timestamp',
+    log.every(
+      (entry) =>
+        Boolean(entry.id) &&
+        Boolean(entry.action) &&
+        Boolean(entry.at) &&
+        Number.isFinite(Date.parse(entry.at))
+    )
+  );
+  check(
+    'admin 06: product edits log the affected product id',
+    log.some(
+      (entry) =>
+        entry.action === 'admin.product_edit' &&
+        /sweetheart-hand-bouquet|grand-yellow-rose-bouquet/.test(entry.detail)
+    )
+  );
+  check(
+    'admin 06: order changes log the affected order id',
+    log.some((entry) => entry.action === 'admin.order_status' && entry.detail.indexOf(order2.id) !== -1)
+  );
+  check(
+    'admin 06: shop edits log the affected shop id',
+    log.some((entry) => entry.action === 'admin.shop_edit' && entry.detail.indexOf('bloom-petals') !== -1)
+  );
+  check(
+    'admin 06: account removal logs the affected account id',
+    log.some((entry) => entry.action === 'admin.delete_account' && entry.detail.indexOf(dee.account.id) !== -1)
+  );
+
+  const auditFilter = ad.getElementById('admin-audit-filter');
+  auditFilter.value = 'admin.product_edit';
+  auditFilter.dispatchEvent(new aw.Event('change', { bubbles: true }));
+  await wait(30);
+  const visibleAuditActions = Array.from(ad.querySelectorAll('.audit-action code')).map((el) => el.textContent);
+  check(
+    'admin 06: audit action filter narrows the visible entries',
+    visibleAuditActions.length > 0 && visibleAuditActions.every((action) => action === 'admin.product_edit')
+  );
+  check('admin 06: admin panels errors clean', adminDom.getErrors().length === 0, adminDom.getErrors().join(' | '));
+
+  /* ---------- Non-admin UI and API are both refused ---------- */
+  const customerViewSeed = dumpStorage(adminDom);
+  customerViewSeed.stallfree_session = maraSessionRaw;
+  const customerAdmin = await openPage('admin.html', '', customerViewSeed);
+  const cad = customerAdmin.window.document;
+  check(
+    'admin 06: customer direct URL shows access denied',
+    /Administrator access required/i.test(cad.getElementById('admin-mount').textContent)
+  );
+  check(
+    'admin 06: customer sees no admin tabs or setup form',
+    !cad.getElementById('admin-tabs') && !cad.getElementById('admin-setup-form')
+  );
+  check(
+    'admin 06: customer cannot mutate the catalogue through the page',
+    customerAdmin.window.saveCatalogOverride('grand-yellow-rose-bouquet', { price: 1 }).ok === false
+  );
+  check('admin 06: customer admin page errors clean', customerAdmin.getErrors().length === 0, customerAdmin.getErrors().join(' | '));
+  customerAdmin.window.close();
+
+  const signedOutSeed = Object.assign({}, customerViewSeed);
+  delete signedOutSeed.stallfree_session;
+  const signedOutAdmin = await openPage('admin.html', '', signedOutSeed);
+  check(
+    'admin 06: signed-out dashboard asks for sign-in and offers no setup',
+    /Please sign in/i.test(signedOutAdmin.window.document.getElementById('admin-mount').textContent) &&
+      !signedOutAdmin.window.document.getElementById('admin-setup-form')
+  );
+  check('admin 06: signed-out admin page errors clean', signedOutAdmin.getErrors().length === 0, signedOutAdmin.getErrors().join(' | '));
+  signedOutAdmin.window.close();
+
+  adminDom.window.close();
 }
 

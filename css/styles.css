@@ -4607,6 +4607,162 @@ a.admin-mini-row:hover {
   margin: 0;
 }
 
+/* --- overview + detail helpers --- */
+.admin-overview-head,
+.admin-shops-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-overview-head h2 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  margin-bottom: 2px;
+}
+
+.admin-shops-head {
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.admin-shops-head p {
+  flex: 1 1 320px;
+  margin: 0;
+}
+
+.admin-row-thumb {
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-row-thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.admin-row-thumb img.is-loaded {
+  opacity: 1;
+}
+
+.admin-order-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.admin-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.admin-detail-grid section {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+
+.admin-order-detail h4 {
+  margin: 16px 0 8px;
+  font-size: 0.92rem;
+}
+
+.admin-detail-grid h4 {
+  margin-top: 0;
+}
+
+.admin-detail-items {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-detail-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px;
+  border-top: 1px dashed var(--border);
+}
+
+.admin-detail-item:first-child {
+  border-top: 0;
+}
+
+.admin-detail-item-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.admin-detail-totals {
+  display: grid;
+  gap: 6px;
+  justify-content: end;
+  margin: 14px 0;
+  text-align: right;
+}
+
+.admin-detail-totals span {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.admin-detail-grand {
+  color: var(--text) !important;
+  font-size: 1rem !important;
+}
+
+.admin-detail-history {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.admin-detail-history-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 520px) {
+  .admin-detail-item {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .admin-detail-item b {
+    grid-column: 2;
+  }
+
+  .admin-overview-head,
+  .admin-order-detail-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-shops-head {
+    flex-direction: column;
+  }
+}
+
 @media (max-width: 480px) {
   .admin-photo-row {
     grid-template-columns: 72px minmax(0, 1fr);
@@ -4687,12 +4843,19 @@ a.admin-mini-row:hover {
     flex-wrap: wrap;
   }
 }
-/* auth pages always show banners as errors */
+/* auth pages always show banners as errors; the admin banner uses explicit
+   error/success classes so a confirmation is not painted as a failure */
 .auth-card .banner,
-#admin-banner:not(.hidden) {
+#admin-banner.banner-error:not(.hidden) {
   background: var(--danger-soft);
   color: var(--danger);
   border: 1px solid #f6d4d4;
+}
+
+#admin-banner.banner-success:not(.hidden) {
+  background: var(--success-soft);
+  color: var(--success);
+  border: 1px solid #c3e7cf;
 }
 /* ===== Stock state on product cards ===== */
 .pc-stock {

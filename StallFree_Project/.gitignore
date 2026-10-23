@@ -1,7 +1,0 @@
-node_modules/
-tests/node_modules/
-coverage/
-*.log
-stallfree-demo-backup*.json
-.env
-.env.*

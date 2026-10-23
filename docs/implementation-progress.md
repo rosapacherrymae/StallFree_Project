@@ -586,3 +586,116 @@ and admin status updates; reviews can be written, edited in place and are safely
 profile/password flows and help content are verified. No feature was removed or rewritten.
 
 **Part complete. Do you want me to continue to Part 06? (yes/no)**
+
+---
+
+## Part 06 — Admin dashboard and management
+
+- **Status:** COMPLETE
+- **Date:** 2026-10-23
+- **Changed files:** `js/admin.js`, `js/storage.js`, `js/auth.js`, `css/styles.css`,
+  `tests/smoke.js`, `docs/implementation-progress.md`
+- **Next part:** not started (Part 07 awaits approval)
+
+### Scope kept
+
+- All six admin tabs remain: Overview, Orders, Products, Shops, Customers, Audit log.
+- No new roles, authentication methods, backend, APIs or payment/shipping services.
+- Every mutation still passes through `requireAdmin()` in `js/storage.js`; the admin page
+  is a local-only demonstration.
+- Only Part 06 was worked on. Parts 07-08 were not started or prepared.
+
+### Work performed
+
+1. **Overview** - figures are now calculated from the records actually stored in the
+   browser (orders, local customer accounts, catalogue products, catalogue shops). Orders
+   are sorted newest first before the "recent activity" list. The panel is explicitly
+   marked **Local demo** / **Simulation only**, states that revenue only counts delivered
+   orders, and says no real sale, payment, shipment or payout happened.
+2. **Orders** - added search/filter (existing controls preserved), a **View details**
+   modal showing customer, item, payment, delivery, totals and status-history snapshots,
+   plus demo labelling. The status picker offers only the current status and allowed next
+   statuses; stale/forced invalid transitions are refused by storage and shown in the
+   banner. Cancelling or requesting a return asks for confirmation first. Status changes
+   continue to release reserved stock once, and the customer's saved history shows the new
+   status and demo tracking reference. Tracking number/courier are trimmed and limited to
+   80 characters; failed order saves surface an error instead of silently passing.
+3. **Products** - rows show archival state, stock, and the number of saved orders that
+   reference the listing. Products referenced by order history offer archive/restore
+   (never permanent delete); the delete action is hidden and `removeProduct()` /
+   `deleteCustomProduct()` refuse it at the storage layer. Unreferenced custom products can
+   still be deleted after confirmation. Create/edit forms share validation: required name,
+   required numeric price and whole-number stock (blank values rejected), bounded values,
+   and compare-at must be higher than the selling price. Edits keep the product ID and
+   overrides, and appear on the storefront immediately. Image thumbnails fall back to the
+   category gradient letter when a URL fails.
+4. **Shops** - only supported fields (store name, tagline, location) can be edited, with
+   length limits and a non-empty store name. Successful edits update the linked catalogue
+   and storefronts; rejected input leaves the saved record unchanged and shows a banner.
+5. **Customers** - searchable account list with order count/spend. Suspend and remove both
+   require explicit confirmation; suspension clears that customer's session and blocks
+   sign-in until reactivated. Removing an account leaves its saved demo orders intact and
+   the admin can still find them. The sole administrator is never listed and cannot be
+   suspended or deleted; no role changes or second admin can be created from this panel.
+6. **Audit log** - admin mutations are recorded with an id, actor, action, timestamp and
+   the affected record id (product, order, shop, account) where applicable. Existing
+   action/period filters still work, and the panel explains the log is browser-local and
+   not tamper-proof.
+7. **Feedback and guards** - admin banners now distinguish success (`banner-success`) from
+   errors (`banner-error`); setup errors keep their danger styling. Empty and error states
+   were checked for each tab, and direct access remains guarded: signed-out visitors get a
+   sign-in prompt, customers get "Administrator access required" with no tabs or setup form,
+   and customer calls to catalogue mutations are refused.
+8. **Focused regression tests** - added section `[20]` (81 checks) in `tests/smoke.js`
+   covering overview values/demo labels, order search/detail/confirmation/lifecycle and
+   customer-history propagation, stock release on cancellation, invalid transitions,
+   archive/restore vs delete for referenced products, create/edit validation and storefront
+   propagation, shop edits, suspend/reactivate/delete behavior, sole-admin guards, audit
+   entries/filtering, and non-admin/signed-out entry points.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| `node --check js/admin.js` / `js/storage.js` / `js/auth.js` / `tests/smoke.js` | PASS |
+| Part 05 baseline | 617 passed, 0 failed |
+| Full suite after Part 06 | **698 passed, 0 failed** (+81 checks) |
+| Six admin tabs still render | PASS |
+| Overview counts match stored orders, accounts, products and shops | PASS |
+| Overview labels figures as local demo / simulation | PASS |
+| Order search, detail snapshots, confirmation, lifecycle | PASS |
+| Cancellation releases reserved stock exactly once | PASS |
+| Invalid status jump is unavailable and refused with a visible error | PASS |
+| Customer order history shows admin status + demo tracking | PASS |
+| Referenced product -> archive/restore; delete refused at UI and storage | PASS |
+| Unreferenced custom product can be deleted after confirmation | PASS |
+| Product create/edit validation (name, price, stock, compare-at) | PASS |
+| Product edits reach the storefront; archived PDP fails softly | PASS |
+| Shop edit propagates to linked product cards; blank name rejected | PASS |
+| Suspend blocks sign-in; reactivate restores access | PASS |
+| Account removal keeps saved orders; sole admin cannot be suspended/deleted | PASS |
+| Audit entries carry id, actor, action, timestamp, record id | PASS |
+| Non-admin and signed-out visitors cannot use the admin UI or mutations | PASS |
+
+### Notes / honest limits
+
+- Everything remains browser-local demo data. There is no shared database, payment
+  processing, courier integration, seller payout, multi-admin support, or server-side
+  authorization; devtools can edit storage and the audit log.
+- The audit log is an activity aid, not a tamper-proof trail.
+- Real-browser visual/keyboard/mobile verification of the new admin detail modal,
+  banners and thumbnails is **NOT TESTED**; jsdom is the executed environment. Deferred to
+  the later polish/verification part.
+- jsdom does not navigate after checkout, so the test helper re-enables the **Place order**
+  button to emulate the real browser's confirmation-page reload. This affects tests only.
+- Pre-existing merge-conflict marker lines in `README.md` and `products.html` were left
+  untouched (outside Part 06 scope; documentation/polish risk for a later part).
+- All implementation work remains uncommitted, as before.
+
+### Checkpoint
+
+**Part 06 complete.** The six admin panels now read real local records, validate and
+confirm destructive actions, keep order-history snapshots intact, and remain inaccessible
+to non-admins. No feature was removed and no new role or backend was introduced.
+
+**Part complete. Do you want me to continue to Part 07? (yes/no)**

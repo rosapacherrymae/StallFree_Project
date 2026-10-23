@@ -301,6 +301,16 @@ function isCustomProduct(productId) {
   return Array.isArray(list) && list.some((p) => p && p.id === productId);
 }
 
+/* How many saved orders (including cancelled ones) contain this product?
+   Used to prefer archive/restore over deleting a listing that historical
+   order snapshots still point at. */
+function productOrderReferenceCount(productId) {
+  return readAllOrders().reduce((count, order) => {
+    const items = Array.isArray(order.items) ? order.items : [];
+    return count + (items.some((item) => item && item.productId === productId) ? 1 : 0);
+  }, 0);
+}
+
 function saveCatalogOverride(productId, patch) {
   const guard = requireAdmin();
   if (!guard.ok) return guard;
@@ -322,12 +332,35 @@ function saveCatalogOverride(productId, patch) {
     if (!findSeller(patch.sellerId)) return { ok: false, error: 'Choose a valid shop.' };
     next.sellerId = patch.sellerId;
   }
-  if (typeof patch.price === 'number' && patch.price >= 0) next.price = patch.price;
-  if (typeof patch.compareAt === 'number' && patch.compareAt >= 0) next.compareAt = patch.compareAt;
-  if (typeof patch.stock === 'number' && patch.stock >= 0) next.stock = Math.floor(patch.stock);
+  if (typeof patch.price === 'number') {
+    if (!Number.isFinite(patch.price) || patch.price < 0) {
+      return { ok: false, error: 'Enter a valid price.' };
+    }
+    next.price = Math.min(patch.price, 10000000);
+  }
+  if (typeof patch.compareAt === 'number') {
+    if (!Number.isFinite(patch.compareAt) || patch.compareAt < 0) {
+      return { ok: false, error: 'Enter a valid compare-at price.' };
+    }
+    next.compareAt = Math.min(patch.compareAt, 10000000);
+  }
+  if (typeof patch.stock === 'number') {
+    if (!Number.isFinite(patch.stock) || patch.stock < 0) {
+      return { ok: false, error: 'Enter a valid stock quantity.' };
+    }
+    next.stock = Math.min(Math.floor(patch.stock), 1000000);
+  }
   if (typeof patch.freeShipping === 'boolean') next.freeShipping = patch.freeShipping;
   if (typeof patch.archived === 'boolean') next.archived = patch.archived;
   if (typeof patch.removed === 'boolean') next.removed = patch.removed;
+
+  if (patch.price !== undefined || patch.compareAt !== undefined) {
+    const finalPrice = typeof next.price === 'number' ? next.price : Number(p.price) || 0;
+    const finalCompareAt = typeof next.compareAt === 'number' ? next.compareAt : Number(p.compareAt) || 0;
+    if (finalCompareAt > 0 && finalCompareAt <= finalPrice) {
+      return { ok: false, error: 'Compare-at price must be higher than the selling price.' };
+    }
+  }
 
   map[productId] = next;
   if (!writeGlobal(GLOBAL_KEYS.catalog, map)) {
@@ -395,6 +428,13 @@ function addCustomProduct(input) {
 function deleteCustomProduct(productId) {
   const guard = requireAdmin();
   if (!guard.ok) return guard;
+  const references = productOrderReferenceCount(productId);
+  if (references > 0) {
+    return {
+      ok: false,
+      error: `This product appears in ${references} saved ${references === 1 ? 'order' : 'orders'}. Archive it instead so order history keeps a valid product reference.`
+    };
+  }
   const list = readGlobal(GLOBAL_KEYS.customProducts, []);
   const rows = Array.isArray(list) ? list : [];
   const next = rows.filter((p) => p && p.id !== productId);
@@ -415,13 +455,20 @@ function deleteCustomProduct(productId) {
   return { ok: true };
 }
 
-/* custom listings are deleted outright; seed listings are flagged
-   removed so historical orders keep resolving their snapshots */
+/* custom listings can be deleted outright only while no saved order points
+   at them; anything referenced by order history must be archived so the
+   historical snapshot still resolves to a real catalogue record */
 function removeProduct(productId) {
   const guard = requireAdmin();
   if (!guard.ok) return guard;
   if (!findProduct(productId)) return { ok: false, error: 'Product not found.' };
-  if (isCustomProduct(productId)) return deleteCustomProduct(productId);
+
+  const references = productOrderReferenceCount(productId);
+  if (isCustomProduct(productId)) {
+    return deleteCustomProduct(productId);
+  }
+
+  if (references > 0) return saveCatalogOverride(productId, { archived: true });
   return saveCatalogOverride(productId, { removed: true });
 }
 
@@ -435,11 +482,22 @@ function saveShopOverride(sellerId, patch) {
   const map = raw && typeof raw === 'object' ? raw : {};
   const next = Object.assign({}, map[sellerId] || {});
 
-  if (typeof patch.storeName === 'string' && patch.storeName.trim()) {
-    next.storeName = patch.storeName.trim().slice(0, 80);
+  if (patch.storeName !== undefined) {
+    const name = String(patch.storeName || '').trim();
+    if (!name) return { ok: false, error: 'Store name cannot be empty.' };
+    if (name.length > 80) return { ok: false, error: 'Store name must be 80 characters or fewer.' };
+    next.storeName = name;
   }
-  if (typeof patch.tagline === 'string') next.tagline = patch.tagline.trim().slice(0, 140);
-  if (typeof patch.location === 'string') next.location = patch.location.trim().slice(0, 80);
+  if (patch.tagline !== undefined) {
+    const tagline = String(patch.tagline || '').trim();
+    if (tagline.length > 140) return { ok: false, error: 'Tagline must be 140 characters or fewer.' };
+    next.tagline = tagline;
+  }
+  if (patch.location !== undefined) {
+    const location = String(patch.location || '').trim();
+    if (location.length > 80) return { ok: false, error: 'Location must be 80 characters or fewer.' };
+    next.location = location;
+  }
 
   map[sellerId] = next;
   if (!writeGlobal(GLOBAL_KEYS.shopOverrides, map)) {
@@ -956,7 +1014,9 @@ function applyOrderStatusChange(order, status, meta = {}) {
   if (meta.tracking) updated.tracking = Object.assign({}, updated.tracking || {}, meta.tracking);
 
   all[index] = updated;
-  saveAllOrders(all);
+  if (!saveAllOrders(all)) {
+    return { ok: false, error: 'Could not save the order status in this browser.' };
+  }
   return { ok: true, order: updated };
 }
 
@@ -968,26 +1028,41 @@ function adminUpdateOrder(orderId, patch = {}) {
   const order = getOrderById(orderId);
   if (!order) return { ok: false, error: 'Order not found.' };
 
+  /* Only the two supported tracking fields are accepted, trimmed and bounded
+     so a pasted value cannot bloat the local order record. */
+  let tracking = null;
+  if (patch.tracking && typeof patch.tracking === 'object' && !Array.isArray(patch.tracking)) {
+    tracking = {};
+    if (typeof patch.tracking.number === 'string') {
+      tracking.number = patch.tracking.number.trim().slice(0, 80);
+    }
+    if (typeof patch.tracking.courier === 'string') {
+      tracking.courier = patch.tracking.courier.trim().slice(0, 80);
+    }
+    if (!Object.keys(tracking).length) tracking = null;
+  }
+
   if (patch.status) {
     const result = applyOrderStatusChange(order, patch.status, {
       by: 'admin',
       note: patch.note || '',
       paymentStatus: patch.paymentStatus,
-      tracking: patch.tracking
+      tracking
     });
     if (!result.ok) return result;
     appendAudit('admin.order_status', `${orderId} → ${patch.status}`);
     return result;
   }
 
-  if (patch.tracking || patch.paymentStatus) {
+  if (tracking || patch.paymentStatus) {
     const all = readAllOrders();
     const index = all.findIndex((o) => o.id === orderId);
+    if (index < 0) return { ok: false, error: 'Order not found.' };
     const updated = Object.assign({}, all[index]);
-    if (patch.tracking) updated.tracking = Object.assign({}, updated.tracking || {}, patch.tracking);
+    if (tracking) updated.tracking = Object.assign({}, updated.tracking || {}, tracking);
     if (patch.paymentStatus) updated.paymentStatus = patch.paymentStatus;
     all[index] = updated;
-    saveAllOrders(all);
+    if (!saveAllOrders(all)) return { ok: false, error: 'Could not save the order in this browser.' };
     appendAudit('admin.order_update', `${orderId} tracking/payment updated`);
     return { ok: true, order: updated };
   }

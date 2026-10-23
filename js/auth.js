@@ -535,7 +535,10 @@ function setAccountSuspended(userId, suspended) {
   }
   saveAccountPatch(acct, { suspended: Boolean(suspended) });
   if (suspended) clearSessionForUser(acct.id);
-  appendAudit(suspended ? 'admin.suspend' : 'admin.unsuspend', acct.email);
+  appendAudit(
+    suspended ? 'admin.suspend' : 'admin.unsuspend',
+    `${acct.email} (${acct.id})`
+  );
   return { ok: true };
 }
 
@@ -552,7 +555,7 @@ function deleteAccount(userId) {
   if (acct.role === 'admin') return { ok: false, error: 'The administrator account cannot be removed.' };
   writeAccounts(readAccounts().filter((a) => a.id !== userId));
   clearSessionForUser(userId);
-  appendAudit('admin.delete_account', acct.email);
+  appendAudit('admin.delete_account', `${acct.email} (${acct.id})`);
   return { ok: true };
 }
 

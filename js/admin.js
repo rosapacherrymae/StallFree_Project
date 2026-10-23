@@ -30,6 +30,22 @@ const ADMIN_TABS = [
   { id: 'audit', label: 'Audit log' }
 ];
 
+/* Local-demo figures are derived from this browser's records only. Every
+   panel that shows money or activity labels that fact in the UI. */
+function adminDemoBadge() {
+  return '<span class="chip chip-accent" title="Stored only in this browser">Local demo</span>';
+}
+
+function adminOrdersNewestFirst() {
+  return getAllOrders()
+    .slice()
+    .sort(
+      (a, b) =>
+        (Date.parse(b.dateISO || b.date || '') || 0) -
+        (Date.parse(a.dateISO || a.date || '') || 0)
+    );
+}
+
 /* ---------------- Entry ---------------- */
 
 function initAdmin() {
@@ -169,14 +185,14 @@ function bindAdminSetup() {
 
       if (!result.ok) {
         if (result.field) setAuthFieldError('as-' + result.field, result.message);
-        else setAuthBanner('admin-banner', result.message);
+        else adminBanner(result.message, true);
         return;
       }
 
       toast('Administrator account created — welcome!', 'success');
       initAdmin();
     } catch (err) {
-      setAuthBanner('admin-banner', 'Setup failed unexpectedly. Please try again.');
+      adminBanner('Setup failed unexpectedly. Please try again.', true);
     } finally {
       setAuthBusy(btn, false);
     }
@@ -258,13 +274,9 @@ function adminBanner(message, isError) {
   if (!banner) return;
   banner.textContent = message || '';
   banner.classList.toggle('hidden', !message);
-  if (isError) {
-    banner.style.background = 'var(--danger-soft)';
-    banner.style.color = 'var(--danger)';
-  } else {
-    banner.style.background = '';
-    banner.style.color = '';
-  }
+  banner.classList.toggle('banner-error', Boolean(message && isError));
+  banner.classList.toggle('banner-success', Boolean(message && !isError));
+  banner.setAttribute('role', message && isError ? 'alert' : 'status');
 }
 
 /* ---------------- Overview ---------------- */
@@ -278,13 +290,13 @@ function adminLowStock() {
 }
 
 function renderAdminOverview(panel) {
-  const orders = getAllOrders();
+  const orders = adminOrdersNewestFirst();
   const delivered = orders.filter((o) => normalizeOrderStatus(o) === 'delivered');
   const pending = orders.filter((o) => {
     const m = statusMeta(o.status);
     return m.flow > 0 && m.id !== 'delivered';
   });
-  const revenue = delivered.reduce((sum, o) => sum + (o.total || 0), 0);
+  const revenue = delivered.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
   const customers = listAccounts().filter((a) => a.role !== 'admin').length;
   const liveProducts = dedupeById(products).filter(isListable).length;
   const shops = sellers.length;
@@ -292,14 +304,22 @@ function renderAdminOverview(panel) {
   const recent = orders.slice(0, 5);
 
   panel.innerHTML = `
+    <div class="admin-overview-head">
+      <div>
+        <h2>Store snapshot</h2>
+        <p class="muted small">Calculated from orders and catalogue records saved in this browser.</p>
+      </div>
+      ${adminDemoBadge()}
+    </div>
+
     <div class="stats-grid">
       <div class="card stat-card">
         <div class="stat">${orders.length}</div>
-        <div class="muted">Orders total</div>
+        <div class="muted">Orders total (demo)</div>
       </div>
       <div class="card stat-card">
         <div class="stat">${pending.length}</div>
-        <div class="muted">Awaiting delivery</div>
+        <div class="muted">Awaiting delivery (demo)</div>
       </div>
       <div class="card stat-card">
         <div class="stat">${formatPrice(revenue)}</div>
@@ -311,11 +331,11 @@ function renderAdminOverview(panel) {
       </div>
       <div class="card stat-card">
         <div class="stat">${shops}</div>
-        <div class="muted">Shops</div>
+        <div class="muted">Catalogue shops</div>
       </div>
       <div class="card stat-card">
         <div class="stat">${customers}</div>
-        <div class="muted">Customer accounts</div>
+        <div class="muted">Customer accounts (local)</div>
       </div>
       <div class="card stat-card">
         <div class="stat">${low.length}</div>
@@ -323,10 +343,12 @@ function renderAdminOverview(panel) {
       </div>
     </div>
 
-    <p class="muted small" style="margin: -4px 0 18px">
-      Revenue counts only orders whose current status is <b>Delivered</b>. Cancelled and
-      in-progress orders are excluded. Figures are derived from this browser's demo data.
-    </p>
+    <div class="banner demo-banner" role="note">
+      <b>Simulation only.</b> Every number on this page comes from demo orders, catalogue
+      edits and accounts stored in this browser. Revenue counts only orders whose current
+      status is <b>Delivered</b>; cancelled and in-progress orders are excluded. No real
+      sale, payment, shipment or seller payout occurred.
+    </div>
 
     <div class="admin-toolbar admin-quick-actions">
       <button type="button" class="btn btn-primary btn-sm" data-admin-new-product>+ Add product</button>
@@ -500,7 +522,7 @@ function adminOrderMatches(o, query) {
 }
 
 function renderAdminOrders(panel) {
-  const all = getAllOrders();
+  const all = adminOrdersNewestFirst();
   const dayWindow = adminOrderDate === '7' ? 7 : adminOrderDate === '30' ? 30 : 0;
   const cutoff = dayWindow ? Date.now() - dayWindow * 864e5 : 0;
   const orders = all
@@ -575,12 +597,14 @@ function renderAdminOrders(panel) {
       <label for="admin-order-sort">Sort</label>
       <select id="admin-order-sort" class="select select-sm">${sortOptions}</select>
       <span class="muted small">${orders.length} ${plural(orders.length, 'order')} shown</span>
+      ${adminDemoBadge()}
     </div>
 
     <p class="muted small" style="margin: -6px 0 16px">
       Status changes follow a fixed flow: placed → confirmed → preparing → shipped → out
-      for delivery → delivered. Final statuses cannot be reopened. Tracking text is a
-      non-functional demo reference; no courier is contacted.
+      for delivery → delivered. Final statuses cannot be reopened. Open a saved order to see
+      its item, customer, payment and status snapshots. Tracking text is a non-functional demo
+      reference; no courier is contacted.
     </p>
 
     ${
@@ -634,6 +658,9 @@ function renderAdminOrders(panel) {
   panel.querySelectorAll('.admin-order [data-admin-save]').forEach((btn) => {
     btn.addEventListener('click', () => saveAdminOrder(btn));
   });
+  panel.querySelectorAll('.admin-order [data-admin-view]').forEach((btn) => {
+    btn.addEventListener('click', () => openAdminOrderDetail(btn.dataset.adminView));
+  });
 }
 
 function adminOrderCardMarkup(o) {
@@ -672,21 +699,140 @@ function adminOrderCardMarkup(o) {
       <p class="muted small admin-order-items">${items}</p>
 
       <div class="admin-order-controls">
+        <button type="button" class="btn btn-sm btn-outline" data-admin-view="${sanitize(o.id)}">View details</button>
         <label class="sr-only" for="admin-status-${sanitize(o.id)}">New status</label>
         <select id="admin-status-${sanitize(o.id)}" class="select select-sm admin-status-select"
           ${nextStatuses.length ? '' : 'disabled'}>${statusOptions}</select>
 
         <label class="sr-only" for="admin-track-${sanitize(o.id)}">Tracking number</label>
         <input type="text" class="input admin-tracking" placeholder="Tracking no."
-          value="${sanitize(tracking.number || '')}" />
+          maxlength="80" value="${sanitize(tracking.number || '')}" />
 
         <label class="sr-only" for="admin-courier-${sanitize(o.id)}">Courier</label>
         <input type="text" class="input admin-courier" placeholder="Courier (e.g. J&T)"
-          value="${sanitize(tracking.courier || '')}" />
+          maxlength="80" value="${sanitize(tracking.courier || '')}" />
 
         <button type="button" class="btn btn-sm btn-primary" data-admin-save>Update</button>
       </div>
     </article>`;
+}
+
+function openAdminOrderDetail(orderId) {
+  const order = getOrderById(orderId);
+  if (!order) {
+    adminBanner('Order not found.', true);
+    toast('Order not found.', 'error');
+    return;
+  }
+
+  const meta = statusMeta(order.status);
+  const customer = order.customer || {};
+  const items = Array.isArray(order.items) ? order.items : [];
+  const history = Array.isArray(order.statusHistory) ? order.statusHistory : [];
+  const tracking = order.tracking || {};
+
+  const itemRows = items.length
+    ? items
+        .map((item) => {
+          const qty = Number(item.qty) || 0;
+          const price = Number(item.price) || 0;
+          const seller = findSeller(item.sellerId);
+          return `
+            <div class="admin-detail-item">
+              <span class="admin-detail-item-name">
+                <b>${sanitize(item.name || 'Item')}</b>
+                <span class="muted small">${sanitize(seller ? seller.storeName : '')}${
+                  item.productId ? ' · ' + sanitize(item.productId) : ''
+                }</span>
+              </span>
+              <span class="muted small">${qty} × ${formatPrice(price)}</span>
+              <b>${formatPrice(price * qty)}</b>
+            </div>`;
+        })
+        .join('')
+    : '<p class="muted small">No item snapshot saved.</p>';
+
+  const historyRows = history.length
+    ? history
+        .map(
+          (entry) => `
+          <li class="admin-detail-history-row">
+            <span class="status ${statusMeta(entry.status).className}">${sanitize(
+              statusMeta(entry.status).label
+            )}</span>
+            <span class="muted small">${sanitize(formatOrderDate(entry.at))} · ${sanitize(
+              entry.by || 'system'
+            )}${entry.note ? ' · ' + sanitize(entry.note) : ''}</span>
+          </li>`
+        )
+        .join('')
+    : '<li class="muted small">No status history saved.</li>';
+
+  openModal(
+    `
+    <div class="modal-pad admin-order-detail">
+      <div class="admin-order-detail-head">
+        <div>
+          <h3>Order ${sanitize(order.id)}</h3>
+          <p class="muted small">${sanitize(order.date || '')} · ${adminDemoBadge()}</p>
+        </div>
+        <span class="status ${meta.className}">${meta.label}</span>
+      </div>
+
+      <div class="admin-detail-grid">
+        <section>
+          <h4>Customer snapshot</h4>
+          <p><b>${sanitize(customer.name || 'Guest')}</b><br />
+          ${sanitize(customer.phone || 'No phone saved')}<br />
+          ${sanitize(customer.address || 'No address saved')}</p>
+          ${customer.note ? `<p class="muted small">Note: ${sanitize(customer.note)}</p>` : ''}
+        </section>
+        <section>
+          <h4>Payment / delivery</h4>
+          <p>${sanitize(order.payment || customer.payment || 'Cash on delivery')}<br />
+          <span class="muted small">Payment status: ${sanitize(
+            order.paymentStatus || 'not recorded'
+          )}</span><br />
+          <span class="muted small">Delivery: ${sanitize(
+            (findShippingMethod(order.shippingMethod) || {}).label || 'Standard delivery'
+          )}${order.deliveryBy ? ' · target ' + sanitize(order.deliveryBy) : ''}</span></p>
+          <p class="muted small">${
+            tracking.number || tracking.courier
+              ? 'Tracking: ' +
+                sanitize([tracking.courier, tracking.number].filter(Boolean).join(' '))
+              : 'No tracking reference saved.'
+          }</p>
+        </section>
+      </div>
+
+      <h4>Items</h4>
+      <div class="admin-detail-items">${itemRows}</div>
+
+      <div class="admin-detail-totals">
+        <span>Subtotal <b>${formatPrice(order.subtotal)}</b></span>
+        ${
+          Number(order.discount) > 0
+            ? `<span>Discount <b>−${formatPrice(order.discount)}</b></span>`
+            : ''
+        }
+        <span>Delivery <b>${formatPrice(order.shipping)}</b></span>
+        <span class="admin-detail-grand">Total <b>${formatPrice(order.total)}</b></span>
+      </div>
+
+      <h4>Status history</h4>
+      <ul class="admin-detail-history">${historyRows}</ul>
+
+      <div class="banner demo-banner" role="note">
+        <b>Demo record.</b> Status and tracking values are local simulation only. No courier,
+        payment provider or real seller was contacted.
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" data-action="close-modal">Close</button>
+      </div>
+    </div>`,
+    { size: 'lg' }
+  );
 }
 
 function saveAdminOrder(btn) {
@@ -702,6 +848,11 @@ function saveAdminOrder(btn) {
   const number = numberInput ? numberInput.value.trim() : '';
   const courier = courierInput ? courierInput.value.trim() : '';
 
+  if (number.length > 80 || courier.length > 80) {
+    toast('Tracking number and courier must be 80 characters or fewer.', 'error');
+    return;
+  }
+
   const patch = {};
   if (select && select.value !== normalizeOrderStatus(order)) patch.status = select.value;
   if (number || courier || order.tracking) patch.tracking = { number, courier };
@@ -711,18 +862,35 @@ function saveAdminOrder(btn) {
     return;
   }
 
-  btn.disabled = true;
-  const result = adminUpdateOrder(orderId, patch);
-  btn.disabled = false;
+  const commit = () => {
+    btn.disabled = true;
+    const result = adminUpdateOrder(orderId, patch);
+    btn.disabled = false;
 
-  if (!result.ok) {
-    adminBanner(result.error, true);
-    toast(result.error, 'error');
+    if (!result.ok) {
+      adminBanner(result.error, true);
+      toast(result.error, 'error');
+      return;
+    }
+
+    adminBanner(`Order ${orderId} updated. The customer's saved history now shows the new status.`);
+    toast(`Order ${orderId} updated`, 'success');
+    renderAdminPanel();
+  };
+
+  if (patch.status === 'cancelled' || patch.status === 'return_requested') {
+    confirmDialog(
+      patch.status === 'cancelled' ? 'Cancel this order?' : 'Mark this return as requested?',
+      patch.status === 'cancelled'
+        ? 'Cancelling releases the reserved stock and is final. The customer will see the cancelled status in their order history.'
+        : 'This is a final status and cannot be reopened. The customer will see it in their order history.',
+      patch.status === 'cancelled' ? 'Cancel order' : 'Set return requested',
+      commit
+    );
     return;
   }
 
-  toast(`Order ${orderId} updated`, 'success');
-  renderAdminPanel();
+  commit();
 }
 
 /* ---------------- Products ---------------- */
@@ -753,7 +921,12 @@ function renderAdminProducts(panel) {
         Show archived &amp; removed
       </label>
       <button type="button" class="btn btn-primary btn-sm" id="admin-add-product">+ Add product</button>
+      ${adminDemoBadge()}
     </div>
+    <p class="muted small" style="margin: -6px 0 16px">
+      Edits save to this browser and appear on the storefront immediately. Products referenced
+      by saved orders show an order count and can be archived/restored instead of deleted.
+    </p>
     <div id="admin-product-list"></div>`;
 
   const search = document.getElementById('admin-product-search');
@@ -839,6 +1012,7 @@ function adminProductRowMarkup(p) {
   const cat = findCategory(p.categoryId);
   const left = productStock(p.id);
   const custom = isCustomProduct(p.id);
+  const references = productOrderReferenceCount(p.id);
   const stateChip = p.removed
     ? '<span class="stock-chip stock-out">Removed</span>'
     : p.archived
@@ -849,32 +1023,52 @@ function adminProductRowMarkup(p) {
     : left <= 5
       ? `<span class="stock-chip stock-warn">${left} left</span>`
       : `<span class="stock-chip">${left} in stock</span>`;
+  const refChip = references
+    ? `<span class="stock-chip" title="Saved orders reference this product">${
+        references
+      } order${references === 1 ? '' : 's'}</span>`
+    : '';
 
   const restoreBtn =
     p.archived || p.removed
-      ? `<button type="button" class="btn btn-sm btn-outline" data-admin-restore="${p.id}">Restore</button>`
-      : `<button type="button" class="btn btn-sm btn-outline" data-admin-archive="${p.id}">Archive</button>`;
+      ? `<button type="button" class="btn btn-sm btn-outline" data-admin-restore="${sanitize(
+          p.id
+        )}">Restore</button>`
+      : `<button type="button" class="btn btn-sm btn-outline" data-admin-archive="${sanitize(
+          p.id
+        )}">Archive</button>`;
 
-  const removeBtn = p.removed
-    ? ''
-    : `<button type="button" class="btn btn-sm btn-outline btn-danger-text" data-admin-remove="${p.id}">${
-        custom ? 'Delete' : 'Remove'
-      }</button>`;
+  /* Products referenced by saved orders keep an archive action instead of a
+     permanent delete so old order records still resolve to a real listing. */
+  const removeBtn =
+    p.removed || references
+      ? ''
+      : `<button type="button" class="btn btn-sm btn-outline btn-danger-text" data-admin-remove="${sanitize(
+          p.id
+        )}">${custom ? 'Delete' : 'Remove'}</button>`;
 
   return `
     <div class="card admin-row" data-product-row="${sanitize(p.id)}">
-      <span class="admin-row-thumb" style="${gradient(categoryColors(p.categoryId))}" aria-hidden="true">${sanitize(
-        p.name.charAt(0).toUpperCase()
-      )}</span>
+      <span class="admin-row-thumb" style="${gradient(categoryColors(p.categoryId))}" aria-hidden="true">
+        <span class="pc-letter">${sanitize(p.name.charAt(0).toUpperCase())}</span>
+        ${
+          p.photo
+            ? `<img src="${photoUrl(p.photo, 120)}" alt="" loading="lazy"
+                 onload="this.classList.add('is-loaded')" onerror="this.remove()" />`
+            : ''
+        }
+      </span>
       <div class="admin-row-main">
         <a href="${productHref(p)}"><b>${sanitize(p.name)}</b></a>
         <span class="muted small">${sanitize(shop ? shop.storeName : '')} · ${sanitize(
           cat ? cat.name : ''
         )} · ${formatPrice(p.price)}${p.compareAt ? ` <s>${formatPrice(p.compareAt)}</s>` : ''}</span>
       </div>
-      <div class="admin-row-meta">${stateChip} ${stockChip}</div>
+      <div class="admin-row-meta">${stateChip} ${stockChip} ${refChip}</div>
       <div class="admin-row-actions">
-        <button type="button" class="btn btn-sm btn-outline" data-admin-edit="${p.id}">Edit</button>
+        <button type="button" class="btn btn-sm btn-outline" data-admin-edit="${sanitize(
+          p.id
+        )}">Edit</button>
         ${restoreBtn}
         ${removeBtn}
       </div>
@@ -893,9 +1087,14 @@ function adminProductOp(result, successMessage) {
 }
 
 function archiveAdminProduct(productId) {
+  const references = productOrderReferenceCount(productId);
   confirmDialog(
     'Archive this product?',
-    'It disappears from the storefront immediately. Past orders keep their snapshot, and you can restore it any time.',
+    `It disappears from the storefront immediately. ${
+      references
+        ? `${references} saved order${references === 1 ? '' : 's'} still reference it, so archiving keeps those records intact. `
+        : ''
+    }You can restore it any time.`,
     'Archive',
     () => adminProductOp(saveCatalogOverride(productId, { archived: true }), 'Product archived')
   );
@@ -910,10 +1109,20 @@ function restoreAdminProduct(productId) {
 
 function removeAdminProduct(productId) {
   const custom = isCustomProduct(productId);
+  const references = productOrderReferenceCount(productId);
+  if (references > 0) {
+    toast(
+      `This product appears in ${references} saved order${
+        references === 1 ? '' : 's'
+      }. Archive it instead so order history keeps a valid reference.`,
+      'error'
+    );
+    return;
+  }
   confirmDialog(
     custom ? 'Delete this product?' : 'Remove this product?',
     custom
-      ? 'This listing was added in the dashboard and will be deleted permanently.'
+      ? 'This listing was added in the dashboard and will be deleted permanently. No saved order references it.'
       : 'It disappears from the storefront. Past orders keep their snapshot, and you can restore it later.',
     custom ? 'Delete permanently' : 'Remove',
     () => {
@@ -951,6 +1160,66 @@ function wireAdminPhotoPreview(inputId, previewId, nameId, colorsFor) {
   if (nameInput) nameInput.addEventListener('input', refresh);
 }
 
+function adminFocusFirstInvalid(ids) {
+  const first = ids.find((id) => {
+    const field = document.getElementById(id);
+    return field && field.getAttribute('aria-invalid') === 'true';
+  });
+  const field = first ? document.getElementById(first) : null;
+  if (field) field.focus();
+}
+
+/* Shared product form rules for create and edit. Returns true when every
+   field passes; field errors are already painted by then. */
+function adminValidateProductFields(input) {
+  let ok = true;
+  const name = String(input.name || '').trim();
+  const price = Number(input.priceRaw);
+  const stock = Number(input.stockRaw);
+  const compareRaw = String(input.compareRaw == null ? '' : input.compareRaw).trim();
+  const compareAt = compareRaw === '' ? 0 : Number(compareRaw);
+  const priceRawText = String(input.priceRaw == null ? '' : input.priceRaw).trim();
+  const stockRawText = String(input.stockRaw == null ? '' : input.stockRaw).trim();
+
+  if (setAuthFieldError(input.prefix + '-name', !name ? 'Enter a product name.' : name.length > 120 ? 'Keep the name to 120 characters or fewer.' : '')) ok = false;
+  if (
+    setAuthFieldError(
+      input.prefix + '-price',
+      !priceRawText || !Number.isFinite(price) || price < 0 || price > 10000000
+        ? 'Enter a price between ₱0 and ₱10,000,000.'
+        : ''
+    )
+  ) {
+    ok = false;
+  }
+  if (
+    setAuthFieldError(
+      input.prefix + '-stock',
+      !stockRawText || !Number.isInteger(stock) || stock < 0 || stock > 1000000
+        ? 'Enter a whole number of units between 0 and 1,000,000.'
+        : ''
+    )
+  ) {
+    ok = false;
+  }
+  if (input.prefix === 'pe') {
+    if (
+      setAuthFieldError(
+        'pe-compare',
+        compareRaw !== '' && (!Number.isFinite(compareAt) || compareAt <= 0)
+          ? 'Enter a compare-at price above zero, or leave it empty.'
+          : compareRaw !== '' && compareAt <= price
+            ? 'Compare-at price must be higher than the selling price.'
+            : ''
+      )
+    ) {
+      ok = false;
+    }
+  }
+  if (!ok) adminFocusFirstInvalid([input.prefix + '-name', input.prefix + '-price', input.prefix + '-stock', 'pe-compare']);
+  return ok;
+}
+
 function openProductEditor(productId) {
   const p = findProduct(productId);
   if (!p) return;
@@ -962,24 +1231,25 @@ function openProductEditor(productId) {
       <form id="pe-form" novalidate>
         <div class="form-group">
           <label for="pe-name">Name *</label>
-          <input type="text" id="pe-name" class="input" value="${sanitize(p.name)}" />
+          <input type="text" id="pe-name" class="input" maxlength="120" value="${sanitize(p.name)}" />
           <p class="field-error hidden" id="pe-name-error"></p>
         </div>
         <div class="admin-form-row">
           <div class="form-group">
             <label for="pe-price">Price (₱) *</label>
-            <input type="number" id="pe-price" class="input" min="0" step="1" value="${p.price}" />
+            <input type="number" id="pe-price" class="input" min="0" max="10000000" step="1" value="${p.price}" />
             <p class="field-error hidden" id="pe-price-error"></p>
           </div>
           <div class="form-group">
             <label for="pe-compare">Compare-at (₱)</label>
-            <input type="number" id="pe-compare" class="input" min="0" step="1" value="${
+            <input type="number" id="pe-compare" class="input" min="0" max="10000000" step="1" value="${
               p.compareAt || ''
             }" placeholder="Leave empty for none" />
+            <p class="field-error hidden" id="pe-compare-error"></p>
           </div>
           <div class="form-group">
             <label for="pe-stock">Total units *</label>
-            <input type="number" id="pe-stock" class="input" min="0" step="1" value="${stockBaseline(p.id)}" />
+            <input type="number" id="pe-stock" class="input" min="0" max="1000000" step="1" value="${stockBaseline(p.id)}" />
             <p class="field-error hidden" id="pe-stock-error"></p>
           </div>
         </div>
@@ -1075,18 +1345,22 @@ function openProductEditor(productId) {
     const stock = Number(stockRaw);
     const compareAt = String(compareRaw).trim() === '' ? 0 : Number(compareRaw);
 
-    let ok = true;
-    if (setAuthFieldError('pe-name', name.trim() ? '' : 'Enter a product name.')) ok = false;
-    if (setAuthFieldError('pe-price', Number.isFinite(price) && price >= 0 ? '' : 'Enter a valid price.')) ok = false;
-    if (setAuthFieldError('pe-stock', Number.isInteger(stock) && stock >= 0 ? '' : 'Enter a whole number of units.')) {
-      ok = false;
+    if (
+      !adminValidateProductFields({
+        prefix: 'pe',
+        name,
+        priceRaw,
+        stockRaw,
+        compareRaw
+      })
+    ) {
+      return;
     }
-    if (!ok) return;
 
     const result = saveCatalogOverride(productId, {
       name: name.trim(),
       price,
-      compareAt: Number.isFinite(compareAt) && compareAt >= 0 ? compareAt : 0,
+      compareAt,
       stock,
       materials: materials.trim(),
       description: description.trim(),
@@ -1097,7 +1371,7 @@ function openProductEditor(productId) {
     });
 
     if (!result.ok) {
-      setAuthBanner('admin-banner', result.error);
+      adminBanner(result.error, true);
       toast(result.error, 'error');
       return;
     }
@@ -1125,18 +1399,18 @@ function openProductCreator() {
       <form id="pc-form" novalidate>
         <div class="form-group">
           <label for="pc-name">Name *</label>
-          <input type="text" id="pc-name" class="input" placeholder="Hand-poured soy candle" />
+          <input type="text" id="pc-name" class="input" maxlength="120" placeholder="Hand-poured soy candle" />
           <p class="field-error hidden" id="pc-name-error"></p>
         </div>
         <div class="admin-form-row">
           <div class="form-group">
             <label for="pc-price">Price (₱) *</label>
-            <input type="number" id="pc-price" class="input" min="0" step="1" placeholder="350" />
+            <input type="number" id="pc-price" class="input" min="0" max="10000000" step="1" placeholder="350" />
             <p class="field-error hidden" id="pc-price-error"></p>
           </div>
           <div class="form-group">
             <label for="pc-stock">Units *</label>
-            <input type="number" id="pc-stock" class="input" min="0" step="1" placeholder="20" />
+            <input type="number" id="pc-stock" class="input" min="0" max="1000000" step="1" placeholder="20" />
             <p class="field-error hidden" id="pc-stock-error"></p>
           </div>
         </div>
@@ -1203,16 +1477,22 @@ function openProductCreator() {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = ((document.getElementById('pc-name') || {}).value || '').trim();
-    const price = Number((document.getElementById('pc-price') || {}).value);
-    const stock = Number((document.getElementById('pc-stock') || {}).value);
+    const priceRaw = (document.getElementById('pc-price') || {}).value;
+    const stockRaw = (document.getElementById('pc-stock') || {}).value;
+    const price = Number(priceRaw);
+    const stock = Number(stockRaw);
 
-    let ok = true;
-    if (setAuthFieldError('pc-name', name ? '' : 'Enter a product name.')) ok = false;
-    if (setAuthFieldError('pc-price', Number.isFinite(price) && price >= 0 ? '' : 'Enter a valid price.')) ok = false;
-    if (setAuthFieldError('pc-stock', Number.isInteger(stock) && stock >= 0 ? '' : 'Enter a whole number of units.')) {
-      ok = false;
+    if (
+      !adminValidateProductFields({
+        prefix: 'pc',
+        name,
+        priceRaw,
+        stockRaw,
+        compareRaw: ''
+      })
+    ) {
+      return;
     }
-    if (!ok) return;
 
     const result = addCustomProduct({
       name,
@@ -1242,10 +1522,14 @@ function openProductCreator() {
 
 function renderAdminShops(panel) {
   panel.innerHTML = `
-    <p class="muted small" style="margin-bottom: 16px">
-      Shops in this version are catalogue records, not authenticated seller accounts.
-      Edits here override the shop name, tagline, and location everywhere on the site.
-    </p>
+    <div class="admin-shops-head">
+      <p class="muted small">
+        Shops in this version are catalogue records, not authenticated seller accounts.
+        Edits here override the shop name, tagline and location everywhere on the site,
+        including linked product cards and storefronts. Shop IDs never change.
+      </p>
+      ${adminDemoBadge()}
+    </div>
     <div class="admin-shops">
       ${sellers
         .map(
@@ -1260,21 +1544,18 @@ function renderAdminShops(panel) {
           </div>
           <div class="form-group">
             <label for="sh-name-${sanitize(s.id)}">Store name</label>
-            <input type="text" id="sh-name-${sanitize(s.id)}" class="input admin-shop-name" value="${sanitize(
-              s.storeName
-            )}" />
+            <input type="text" id="sh-name-${sanitize(s.id)}" class="input admin-shop-name"
+              maxlength="80" value="${sanitize(s.storeName)}" />
           </div>
           <div class="form-group">
             <label for="sh-tag-${sanitize(s.id)}">Tagline</label>
-            <input type="text" id="sh-tag-${sanitize(s.id)}" class="input admin-shop-tagline" value="${sanitize(
-              s.tagline
-            )}" />
+            <input type="text" id="sh-tag-${sanitize(s.id)}" class="input admin-shop-tagline"
+              maxlength="140" value="${sanitize(s.tagline)}" />
           </div>
           <div class="form-group">
             <label for="sh-loc-${sanitize(s.id)}">Location</label>
-            <input type="text" id="sh-loc-${sanitize(s.id)}" class="input admin-shop-location" value="${sanitize(
-              s.location
-            )}" />
+            <input type="text" id="sh-loc-${sanitize(s.id)}" class="input admin-shop-location"
+              maxlength="80" value="${sanitize(s.location)}" />
           </div>
           <button type="button" class="btn btn-sm btn-primary" data-admin-shop-save>Save shop</button>
         </section>`
@@ -1291,7 +1572,23 @@ function renderAdminShops(panel) {
       const location = (card.querySelector('.admin-shop-location') || {}).value || '';
 
       if (!name.trim()) {
+        adminBanner('Store name cannot be empty.', true);
         toast('Store name cannot be empty', 'error');
+        return;
+      }
+      if (name.trim().length > 80) {
+        adminBanner('Store name must be 80 characters or fewer.', true);
+        toast('Store name is too long', 'error');
+        return;
+      }
+      if (tagline.trim().length > 140) {
+        adminBanner('Tagline must be 140 characters or fewer.', true);
+        toast('Tagline is too long', 'error');
+        return;
+      }
+      if (location.trim().length > 80) {
+        adminBanner('Location must be 80 characters or fewer.', true);
+        toast('Location is too long', 'error');
         return;
       }
 
@@ -1305,6 +1602,7 @@ function renderAdminShops(panel) {
         toast(result.error, 'error');
         return;
       }
+      adminBanner(`Shop ${result.shop.storeName} updated. Linked product cards and storefronts now use these details.`);
       toast('Shop updated', 'success');
       refreshAccountChrome();
       renderAdminPanel();
@@ -1322,15 +1620,15 @@ function renderAdminCustomers(panel) {
         [a.name, a.email, a.firstName, a.lastName].join(' ').toLowerCase().includes(needle)
       )
     : allAccounts;
-  const orders = getAllOrders();
+  const orders = adminOrdersNewestFirst();
 
   const rows = accounts.length
     ? accounts
         .map((a) => {
           const mine = orders.filter((o) => (o.userId || 'guest') === a.id);
           const spent = mine
-            .filter((o) => o.status !== 'cancelled')
-            .reduce((sum, o) => sum + (o.total || 0), 0);
+            .filter((o) => normalizeOrderStatus(o) !== 'cancelled')
+            .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
           return `
           <div class="card admin-row" data-account="${sanitize(a.id)}">
             <div class="admin-row-main">
@@ -1369,10 +1667,12 @@ function renderAdminCustomers(panel) {
         allAccounts.length,
         'customer'
       )}</span>
+      ${adminDemoBadge()}
     </div>
     <p class="muted small" style="margin: -6px 0 16px">
       Local prototype accounts only. The sole administrator is never listed here and cannot
-      be suspended or deleted.
+      be suspended or deleted. Suspending clears that customer's session in this browser;
+      removing an account keeps its saved demo orders for your records.
     </p>
     ${rows}`;
 
@@ -1398,9 +1698,15 @@ function renderAdminCustomers(panel) {
         const apply = () => {
           const result = setAccountSuspended(userId, suspend);
           if (!result.ok) {
+            adminBanner(result.error, true);
             toast(result.error, 'error');
             return;
           }
+          adminBanner(
+            suspend
+              ? 'Account suspended. The customer is signed out and cannot sign in until reactivated.'
+              : 'Account reactivated. The customer can sign in again.'
+          );
           toast(suspend ? 'Account suspended' : 'Account reactivated', 'success');
           renderAdminPanel();
         };
@@ -1422,14 +1728,16 @@ function renderAdminCustomers(panel) {
       deleteBtn.addEventListener('click', () => {
         confirmDialog(
           'Remove this account?',
-          'The account can no longer sign in. Past orders stay in the system for your records.',
+          'The account can no longer sign in. Its saved demo orders stay in the system for your records, so order history is not corrupted.',
           'Remove account',
           () => {
             const result = deleteAccount(userId);
             if (!result.ok) {
+              adminBanner(result.error, true);
               toast(result.error, 'error');
               return;
             }
+            adminBanner('Account removed. Saved demo orders were kept.');
             toast('Account removed', 'success');
             renderAdminPanel();
           }
@@ -1495,10 +1803,12 @@ function renderAdminAudit(panel) {
       <label for="admin-audit-date">Period</label>
       <select id="admin-audit-date" class="select select-sm">${dateOptions}</select>
       <span class="muted small">${filtered.length} of ${log.length} ${plural(log.length, 'entry', 'entries')}</span>
+      ${adminDemoBadge()}
     </div>
     <p class="muted small" style="margin: -6px 0 16px">
-      This history is stored in the browser and can be edited with developer tools. It is an
-      activity aid, not a tamper-proof audit trail.
+      Administrator changes are recorded with a timestamp, actor and affected record ID
+      where available. This history is stored in the browser and can be edited with developer
+      tools. It is an activity aid, not a tamper-proof audit trail.
     </p>
     ${
       filtered.length
