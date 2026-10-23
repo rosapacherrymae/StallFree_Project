@@ -8,26 +8,26 @@
    Loaded solely by admin.html (before main.js).
    ===================================================================== */
 
-let adminTab = 'overview';
-let adminProductQuery = '';
-let adminProductCategory = 'all';
-let adminProductStock = 'all';
+let adminTab = "overview";
+let adminProductQuery = "";
+let adminProductCategory = "all";
+let adminProductStock = "all";
 let adminShowHidden = false;
-let adminOrderFilter = 'all';
-let adminOrderQuery = '';
-let adminOrderSort = 'newest';
-let adminOrderDate = 'all';
-let adminCustomerQuery = '';
-let adminAuditFilter = 'all';
-let adminAuditDate = 'all';
+let adminOrderFilter = "all";
+let adminOrderQuery = "";
+let adminOrderSort = "newest";
+let adminOrderDate = "all";
+let adminCustomerQuery = "";
+let adminAuditFilter = "all";
+let adminAuditDate = "all";
 
 const ADMIN_TABS = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'orders', label: 'Orders' },
-  { id: 'products', label: 'Products' },
-  { id: 'shops', label: 'Shops' },
-  { id: 'customers', label: 'Customers' },
-  { id: 'audit', label: 'Audit log' }
+  { id: "overview", label: "Overview" },
+  { id: "orders", label: "Orders" },
+  { id: "products", label: "Products" },
+  { id: "shops", label: "Shops" },
+  { id: "customers", label: "Customers" },
+  { id: "audit", label: "Audit log" },
 ];
 
 /* Local-demo figures are derived from this browser's records only. Every
@@ -41,15 +41,15 @@ function adminOrdersNewestFirst() {
     .slice()
     .sort(
       (a, b) =>
-        (Date.parse(b.dateISO || b.date || '') || 0) -
-        (Date.parse(a.dateISO || a.date || '') || 0)
+        (Date.parse(b.dateISO || b.date || "") || 0) -
+        (Date.parse(a.dateISO || a.date || "") || 0),
     );
 }
 
 /* ---------------- Entry ---------------- */
 
 function initAdmin() {
-  const mount = document.getElementById('admin-mount');
+  const mount = document.getElementById("admin-mount");
   if (!mount) return;
 
   /* one-time bootstrap — closes forever once an admin exists. A signed-in
@@ -57,47 +57,48 @@ function initAdmin() {
      ceremony cannot be performed from a normal shopper account. */
   if (!adminExists()) {
     if (isAuthenticated()) {
-      document.title = 'Access denied | StallFree';
+      document.title = "Access denied | StallFree";
       mount.innerHTML = emptyState(
-        'Administrator access required',
-        'This account is a customer account. Sign out if you are the site owner and need to run the one-time administrator setup in this browser.',
-        'Back to home',
-        'index.html'
+        "Administrator access required",
+        "This account is a customer account. Sign out if you are the site owner and need to run the one-time administrator setup in this browser.",
+        "Back to home",
+        "index.html",
       );
       return;
     }
-    document.title = 'Administrator setup | StallFree';
+    document.title = "Administrator setup | StallFree";
     mount.innerHTML = adminSetupMarkup();
     bindAdminSetup();
     return;
   }
 
   if (!isAuthenticated()) {
-    document.title = 'Sign in required | StallFree';
+    document.title = "Sign in required | StallFree";
     mount.innerHTML = emptyState(
-      'Please sign in',
-      'The dashboard is limited to the designated administrator account.',
-      'Sign in',
-      'login.html?next=admin.html'
+      "Please sign in",
+      "The dashboard is limited to the designated administrator account.",
+      "Sign in",
+      "login.html?next=admin.html",
     );
     return;
   }
 
   if (!isAdmin()) {
-    document.title = 'Access denied | StallFree';
+    document.title = "Access denied | StallFree";
     mount.innerHTML = emptyState(
-      'Administrator access required',
-      'This account does not have dashboard permissions. Contact the site owner if you think this is wrong.',
-      'Back to home',
-      'index.html'
+      "Administrator access required",
+      "This account does not have dashboard permissions. Contact the site owner if you think this is wrong.",
+      "Back to home",
+      "index.html",
     );
     return;
   }
 
-  document.title = 'Admin dashboard | StallFree';
-  adminTab = 'overview';
+  document.title = "Admin dashboard | StallFree";
+  adminTab = "overview";
   mount.innerHTML = adminShellMarkup();
   bindAdminTabs();
+  bindAdminSignOut();
   renderAdminPanel();
 }
 
@@ -162,37 +163,38 @@ function adminSetupMarkup() {
 }
 
 function bindAdminSetup() {
-  const form = document.getElementById('admin-setup-form');
+  const form = document.getElementById("admin-setup-form");
   if (!form) return;
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    ['key', 'name', 'email', 'password', 'confirm'].forEach((f) =>
-      setAuthFieldError('as-' + f, '')
+    ["key", "name", "email", "password", "confirm"].forEach((f) =>
+      setAuthFieldError("as-" + f, ""),
     );
-    setAuthBanner('admin-banner', '');
+    setAuthBanner("admin-banner", "");
 
-    const btn = document.getElementById('as-submit');
-    setAuthBusy(btn, true, 'Creating…');
+    const btn = document.getElementById("as-submit");
+    setAuthBusy(btn, true, "Creating…");
     try {
       const result = await adminSetup({
-        key: (document.getElementById('as-key') || {}).value || '',
-        name: (document.getElementById('as-name') || {}).value || '',
-        email: (document.getElementById('as-email') || {}).value || '',
-        password: (document.getElementById('as-password') || {}).value || '',
-        confirm: (document.getElementById('as-confirm') || {}).value || ''
+        key: (document.getElementById("as-key") || {}).value || "",
+        name: (document.getElementById("as-name") || {}).value || "",
+        email: (document.getElementById("as-email") || {}).value || "",
+        password: (document.getElementById("as-password") || {}).value || "",
+        confirm: (document.getElementById("as-confirm") || {}).value || "",
       });
 
       if (!result.ok) {
-        if (result.field) setAuthFieldError('as-' + result.field, result.message);
+        if (result.field)
+          setAuthFieldError("as-" + result.field, result.message);
         else adminBanner(result.message, true);
         return;
       }
 
-      toast('Administrator account created — welcome!', 'success');
+      toast("Administrator account created — welcome!", "success");
       initAdmin();
     } catch (err) {
-      adminBanner('Setup failed unexpectedly. Please try again.', true);
+      adminBanner("Setup failed unexpectedly. Please try again.", true);
     } finally {
       setAuthBusy(btn, false);
     }
@@ -205,17 +207,17 @@ function adminShellMarkup() {
   const acct = getSessionAccount();
   const tabs = ADMIN_TABS.map(
     (t) => `
-      <button type="button" class="tab ${t.id === adminTab ? 'active' : ''}" data-tab="${t.id}"
-        role="tab" aria-selected="${t.id === adminTab}">${t.label}</button>`
-  ).join('');
+      <button type="button" class="tab ${t.id === adminTab ? "active" : ""}" data-tab="${t.id}"
+        role="tab" aria-selected="${t.id === adminTab}">${t.label}</button>`,
+  ).join("");
 
   return `
     <div class="page-head">
       <div>
         <h1>Administrator dashboard</h1>
-        <p class="tagline">Signed in as ${sanitize(acct ? acct.email : 'admin')} · single-admin build</p>
+        <p class="tagline">Signed in as ${sanitize(acct ? acct.email : "admin")} · single-admin build</p>
       </div>
-      <a href="index.html" class="btn btn-outline">View storefront</a>
+      <button type="button" class="btn btn-outline" id="admin-signout">Sign out</button>
     </div>
 
     <div class="banner hidden" id="admin-banner" role="alert"></div>
@@ -225,42 +227,56 @@ function adminShellMarkup() {
     <div id="admin-panel" role="tabpanel"></div>`;
 }
 
+function bindAdminSignOut() {
+  const button = document.getElementById("admin-signout");
+  if (!button) return;
+
+  button.addEventListener("click", () => {
+    if (!window.confirm("Are you sure you want to sign out?")) {
+      return;
+    }
+
+    logoutAccount();
+    window.location.replace("login.html");
+  });
+}
+
 function bindAdminTabs() {
-  const bar = document.getElementById('admin-tabs');
+  const bar = document.getElementById("admin-tabs");
   if (!bar) return;
-  bar.querySelectorAll('.tab').forEach((btn) => {
-    btn.addEventListener('click', () => {
+  bar.querySelectorAll(".tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
       adminTab = btn.dataset.tab;
-      bar.querySelectorAll('.tab').forEach((b) => {
+      bar.querySelectorAll(".tab").forEach((b) => {
         const on = b === btn;
-        b.classList.toggle('active', on);
-        b.setAttribute('aria-selected', String(on));
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-selected", String(on));
       });
       renderAdminPanel();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
   });
 }
 
 function renderAdminPanel() {
-  const panel = document.getElementById('admin-panel');
+  const panel = document.getElementById("admin-panel");
   if (!panel) return;
-  adminBanner('');
+  adminBanner("");
 
   switch (adminTab) {
-    case 'orders':
+    case "orders":
       renderAdminOrders(panel);
       break;
-    case 'products':
+    case "products":
       renderAdminProducts(panel);
       break;
-    case 'shops':
+    case "shops":
       renderAdminShops(panel);
       break;
-    case 'customers':
+    case "customers":
       renderAdminCustomers(panel);
       break;
-    case 'audit':
+    case "audit":
       renderAdminAudit(panel);
       break;
     default:
@@ -270,13 +286,13 @@ function renderAdminPanel() {
 }
 
 function adminBanner(message, isError) {
-  const banner = document.getElementById('admin-banner');
+  const banner = document.getElementById("admin-banner");
   if (!banner) return;
-  banner.textContent = message || '';
-  banner.classList.toggle('hidden', !message);
-  banner.classList.toggle('banner-error', Boolean(message && isError));
-  banner.classList.toggle('banner-success', Boolean(message && !isError));
-  banner.setAttribute('role', message && isError ? 'alert' : 'status');
+  banner.textContent = message || "";
+  banner.classList.toggle("hidden", !message);
+  banner.classList.toggle("banner-error", Boolean(message && isError));
+  banner.classList.toggle("banner-success", Boolean(message && !isError));
+  banner.setAttribute("role", message && isError ? "alert" : "status");
 }
 
 /* ---------------- Overview ---------------- */
@@ -291,13 +307,15 @@ function adminLowStock() {
 
 function renderAdminOverview(panel) {
   const orders = adminOrdersNewestFirst();
-  const delivered = orders.filter((o) => normalizeOrderStatus(o) === 'delivered');
+  const delivered = orders.filter(
+    (o) => normalizeOrderStatus(o) === "delivered",
+  );
   const pending = orders.filter((o) => {
     const m = statusMeta(o.status);
-    return m.flow > 0 && m.id !== 'delivered';
+    return m.flow > 0 && m.id !== "delivered";
   });
   const revenue = delivered.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
-  const customers = listAccounts().filter((a) => a.role !== 'admin').length;
+  const customers = listAccounts().filter((a) => a.role !== "admin").length;
   const liveProducts = dedupeById(products).filter(isListable).length;
   const shops = sellers.length;
   const low = adminLowStock();
@@ -353,9 +371,6 @@ function renderAdminOverview(panel) {
     <div class="admin-toolbar admin-quick-actions">
       <button type="button" class="btn btn-primary btn-sm" data-admin-new-product>+ Add product</button>
       <button type="button" class="btn btn-outline btn-sm" data-goto-tab="orders">Review pending orders</button>
-      <button type="button" class="btn btn-outline btn-sm" data-admin-export>Export demo backup</button>
-      <button type="button" class="btn btn-outline btn-sm" data-admin-import>Import demo backup</button>
-      <input type="file" id="admin-import-file" accept="application/json,.json" class="hidden" />
     </div>
 
     <div class="admin-two-col">
@@ -370,17 +385,17 @@ function renderAdminOverview(panel) {
                 .map((o) => {
                   const meta = statusMeta(o.status);
                   return `
-                  <a class="admin-mini-row" href="orders.html?id=${encodeURIComponent(o.id)}">
+                  <button type="button" class="admin-mini-row" data-overview-order="${sanitize(o.id)}" style="width:100%;text-align:left;cursor:pointer;border:0;background:transparent;font:inherit">
                     <span><b>${sanitize(o.id)}</b><br /><span class="muted small">${sanitize(
-                      o.customer ? o.customer.name : ''
+                      o.customer ? o.customer.name : "",
                     )} · ${sanitize(o.date)}</span></span>
                     <span class="admin-mini-right">
                       <span class="status ${meta.className}">${meta.label}</span>
                       <b>${formatPrice(o.total)}</b>
                     </span>
-                  </a>`;
+                  </button>`;
                 })
-                .join('')
+                .join("")
             : '<p class="muted small">No orders yet.</p>'
         }
       </section>
@@ -396,15 +411,15 @@ function renderAdminOverview(panel) {
                 .map(
                   (row) => `
                   <div class="admin-mini-row">
-                    <span><b>${sanitize(row.product.name)}</b><br /><span class="muted small">${
-                      sanitize((findSeller(row.product.sellerId) || {}).storeName || '')
-                    }</span></span>
-                    <span class="stock-chip ${row.left === 0 ? 'stock-out' : 'stock-warn'}">${
-                      row.left === 0 ? 'Sold out' : row.left + ' left'
+                    <span><b>${sanitize(row.product.name)}</b><br /><span class="muted small">${sanitize(
+                      (findSeller(row.product.sellerId) || {}).storeName || "",
+                    )}</span></span>
+                    <span class="stock-chip ${row.left === 0 ? "stock-out" : "stock-warn"}">${
+                      row.left === 0 ? "Sold out" : row.left + " left"
                     }</span>
-                  </div>`
+                  </div>`,
                 )
-                .join('')
+                .join("")
             : '<p class="muted small">Every listing has healthy stock.</p>'
         }
       </section>
@@ -421,16 +436,24 @@ function renderAdminOverview(panel) {
       </p>
     </section>`;
 
-  panel.querySelectorAll('[data-goto-tab]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+  panel.querySelectorAll("[data-goto-tab]").forEach((btn) => {
+    btn.addEventListener("click", () => {
       const tab = btn.dataset.gotoTab;
-      const tabBtn = document.querySelector(`#admin-tabs .tab[data-tab="${tab}"]`);
+      const tabBtn = document.querySelector(
+        `#admin-tabs .tab[data-tab="${tab}"]`,
+      );
       if (tabBtn) tabBtn.click();
     });
   });
 
-  const newProduct = panel.querySelector('[data-admin-new-product]');
-  if (newProduct) newProduct.addEventListener('click', openProductCreator);
+  const newProduct = panel.querySelector("[data-admin-new-product]");
+  if (newProduct) newProduct.addEventListener("click", openProductCreator);
+
+  panel.querySelectorAll("[data-overview-order]").forEach((button) => {
+    button.addEventListener("click", () => {
+      openAdminOrderDetail(button.dataset.overviewOrder);
+    });
+  });
 
   bindDemoBackupControls(panel);
 }
@@ -438,71 +461,73 @@ function renderAdminOverview(panel) {
 /* ---------------- Demo backup controls ---------------- */
 
 function bindDemoBackupControls(panel) {
-  const exportBtn = panel.querySelector('[data-admin-export]');
+  const exportBtn = panel.querySelector("[data-admin-export]");
   if (exportBtn) {
-    exportBtn.addEventListener('click', () => {
+    exportBtn.addEventListener("click", () => {
       const result = demoBackupData();
       if (!result.ok) {
-        toast(result.error, 'error');
+        toast(result.error, "error");
         return;
       }
       const stamp = new Date().toISOString().slice(0, 10);
-      const blob = new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(result.data, null, 2)], {
+        type: "application/json",
+      });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = `stallfree-demo-backup-${stamp}.json`;
       document.body.appendChild(link);
       link.click();
       link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      toast('Demo backup downloaded', 'success');
+      toast("Demo backup downloaded", "success");
     });
   }
 
-  const importBtn = panel.querySelector('[data-admin-import]');
-  const fileInput = panel.querySelector('#admin-import-file');
+  const importBtn = panel.querySelector("[data-admin-import]");
+  const fileInput = panel.querySelector("#admin-import-file");
   if (importBtn && fileInput) {
-    importBtn.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', () => {
+    importBtn.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
       const file = fileInput.files && fileInput.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
         let parsed;
         try {
-          parsed = JSON.parse(String(reader.result || ''));
+          parsed = JSON.parse(String(reader.result || ""));
         } catch (e) {
-          toast('That file is not valid JSON.', 'error');
-          fileInput.value = '';
+          toast("That file is not valid JSON.", "error");
+          fileInput.value = "";
           return;
         }
         const checked = validateDemoBackup(parsed);
         if (!checked.ok) {
-          toast(checked.errors[0], 'error');
-          fileInput.value = '';
+          toast(checked.errors[0], "error");
+          fileInput.value = "";
           return;
         }
         const s = checked.summary;
         confirmDialog(
-          'Replace demo data?',
+          "Replace demo data?",
           `Import ${s.orders} orders, ${s.products} custom products, ${s.catalogOverrides} catalogue edits and ${s.shops} shop edits. Existing demo orders and catalogue edits in this browser will be replaced. Accounts are not affected.`,
-          'Import and reload',
+          "Import and reload",
           () => {
             const result = importDemoData(parsed);
             if (!result.ok) {
-              toast(result.error, 'error');
+              toast(result.error, "error");
               return;
             }
-            toast('Demo data imported — reloading', 'success');
+            toast("Demo data imported — reloading", "success");
             setTimeout(() => window.location.reload(), 600);
-          }
+          },
         );
-        fileInput.value = '';
+        fileInput.value = "";
       };
       reader.onerror = () => {
-        toast('Could not read that file.', 'error');
-        fileInput.value = '';
+        toast("Could not read that file.", "error");
+        fileInput.value = "";
       };
       reader.readAsText(file);
     });
@@ -512,79 +537,100 @@ function bindDemoBackupControls(panel) {
 /* ---------------- Orders ---------------- */
 
 function adminOrderMatches(o, query) {
-  const q = String(query || '').trim().toLowerCase();
+  const q = String(query || "")
+    .trim()
+    .toLowerCase();
   if (!q) return true;
-  const items = (o.items || []).map((i) => i.name || '').join(' ');
-  return [o.id, o.customer ? o.customer.name : '', o.customer ? o.customer.phone : '', items]
-    .join(' ')
+  const items = (o.items || []).map((i) => i.name || "").join(" ");
+  return [
+    o.id,
+    o.customer ? o.customer.name : "",
+    o.customer ? o.customer.phone : "",
+    items,
+  ]
+    .join(" ")
     .toLowerCase()
     .includes(q);
 }
 
 function renderAdminOrders(panel) {
   const all = adminOrdersNewestFirst();
-  const dayWindow = adminOrderDate === '7' ? 7 : adminOrderDate === '30' ? 30 : 0;
+  const dayWindow =
+    adminOrderDate === "7" ? 7 : adminOrderDate === "30" ? 30 : 0;
   const cutoff = dayWindow ? Date.now() - dayWindow * 864e5 : 0;
   const orders = all
     .filter(
       (o) =>
-        (adminOrderFilter === 'all' || statusMeta(o.status).id === adminOrderFilter) &&
-        adminOrderMatches(o, adminOrderQuery)
+        (adminOrderFilter === "all" ||
+          statusMeta(o.status).id === adminOrderFilter) &&
+        adminOrderMatches(o, adminOrderQuery),
     )
     .filter((o) => {
       if (!cutoff) return true;
-      const stamp = Date.parse(o.dateISO || o.createdAt || o.date || '');
+      const stamp = Date.parse(o.dateISO || o.createdAt || o.date || "");
       return Number.isFinite(stamp) && stamp >= cutoff;
     })
     .sort((a, b) => {
       switch (adminOrderSort) {
-        case 'oldest':
-          return Date.parse(a.dateISO || a.date || 0) - Date.parse(b.dateISO || b.date || 0);
-        case 'total-desc':
+        case "oldest":
+          return (
+            Date.parse(a.dateISO || a.date || 0) -
+            Date.parse(b.dateISO || b.date || 0)
+          );
+        case "total-desc":
           return (b.total || 0) - (a.total || 0);
-        case 'total-asc':
+        case "total-asc":
           return (a.total || 0) - (b.total || 0);
-        case 'status': {
+        case "status": {
           const order = ORDER_STATUSES.map((s) => s.id);
-          return order.indexOf(statusMeta(a.status).id) - order.indexOf(statusMeta(b.status).id);
+          return (
+            order.indexOf(statusMeta(a.status).id) -
+            order.indexOf(statusMeta(b.status).id)
+          );
         }
         default:
-          return Date.parse(b.dateISO || b.date || 0) - Date.parse(a.dateISO || a.date || 0);
+          return (
+            Date.parse(b.dateISO || b.date || 0) -
+            Date.parse(a.dateISO || a.date || 0)
+          );
       }
     });
 
-  const filterOptions = ['all']
+  const filterOptions = ["all"]
     .concat(ORDER_STATUSES.map((s) => s.id))
     .map((id) => {
-      const label = id === 'all' ? 'All statuses' : statusMeta(id).label;
-      const count = id === 'all' ? all.length : all.filter((o) => statusMeta(o.status).id === id).length;
-      return `<option value="${id}" ${id === adminOrderFilter ? 'selected' : ''}>${label} (${count})</option>`;
+      const label = id === "all" ? "All statuses" : statusMeta(id).label;
+      const count =
+        id === "all"
+          ? all.length
+          : all.filter((o) => statusMeta(o.status).id === id).length;
+      return `<option value="${id}" ${id === adminOrderFilter ? "selected" : ""}>${label} (${count})</option>`;
     })
-    .join('');
+    .join("");
 
   const sortOptions = [
-    ['newest', 'Newest first'],
-    ['oldest', 'Oldest first'],
-    ['total-desc', 'Total: high to low'],
-    ['total-asc', 'Total: low to high'],
-    ['status', 'Status order']
+    ["newest", "Newest first"],
+    ["oldest", "Oldest first"],
+    ["total-desc", "Total: high to low"],
+    ["total-asc", "Total: low to high"],
+    ["status", "Status order"],
   ]
     .map(
       ([id, label]) =>
-        `<option value="${id}" ${id === adminOrderSort ? 'selected' : ''}>${label}</option>`
+        `<option value="${id}" ${id === adminOrderSort ? "selected" : ""}>${label}</option>`,
     )
-    .join('');
+    .join("");
 
   const dateOptions = [
-    ['all', 'All dates'],
-    ['7', 'Last 7 days'],
-    ['30', 'Last 30 days']
+    ["all", "All dates"],
+    ["7", "Last 7 days"],
+    ["30", "Last 30 days"],
   ]
     .map(
       ([id, label]) =>
-        `<option value="${id}" ${id === adminOrderDate ? 'selected' : ''}>${label}</option>`
+        `<option value="${id}" ${id === adminOrderDate ? "selected" : ""}>${label}</option>`,
     )
-    .join('');
+    .join("");
 
   panel.innerHTML = `
     <div class="admin-toolbar">
@@ -596,7 +642,7 @@ function renderAdminOrders(panel) {
       <select id="admin-order-date" class="select select-sm">${dateOptions}</select>
       <label for="admin-order-sort">Sort</label>
       <select id="admin-order-sort" class="select select-sm">${sortOptions}</select>
-      <span class="muted small">${orders.length} ${plural(orders.length, 'order')} shown</span>
+      <span class="muted small">${orders.length} ${plural(orders.length, "order")} shown</span>
       ${adminDemoBadge()}
     </div>
 
@@ -609,21 +655,21 @@ function renderAdminOrders(panel) {
 
     ${
       orders.length
-        ? orders.map(adminOrderCardMarkup).join('')
+        ? orders.map(adminOrderCardMarkup).join("")
         : emptyState(
-            'No orders here',
-            adminOrderQuery || adminOrderDate !== 'all'
-              ? 'No order matches that search and date range. Clear or widen the filters.'
-              : 'Try a different status filter.'
+            "No orders here",
+            adminOrderQuery || adminOrderDate !== "all"
+              ? "No order matches that search and date range. Clear or widen the filters."
+              : "Try a different status filter.",
           )
     }`;
 
-  const search = document.getElementById('admin-order-search');
+  const search = document.getElementById("admin-order-search");
   if (search) {
-    search.addEventListener('input', () => {
+    search.addEventListener("input", () => {
       adminOrderQuery = search.value;
       renderAdminOrders(panel);
-      const next = document.getElementById('admin-order-search');
+      const next = document.getElementById("admin-order-search");
       if (next) {
         next.focus();
         next.setSelectionRange(next.value.length, next.value.length);
@@ -631,35 +677,37 @@ function renderAdminOrders(panel) {
     });
   }
 
-  const filter = document.getElementById('admin-order-filter');
+  const filter = document.getElementById("admin-order-filter");
   if (filter) {
-    filter.addEventListener('change', () => {
+    filter.addEventListener("change", () => {
       adminOrderFilter = filter.value;
       renderAdminOrders(panel);
     });
   }
 
-  const date = document.getElementById('admin-order-date');
+  const date = document.getElementById("admin-order-date");
   if (date) {
-    date.addEventListener('change', () => {
+    date.addEventListener("change", () => {
       adminOrderDate = date.value;
       renderAdminOrders(panel);
     });
   }
 
-  const sort = document.getElementById('admin-order-sort');
+  const sort = document.getElementById("admin-order-sort");
   if (sort) {
-    sort.addEventListener('change', () => {
+    sort.addEventListener("change", () => {
       adminOrderSort = sort.value;
       renderAdminOrders(panel);
     });
   }
 
-  panel.querySelectorAll('.admin-order [data-admin-save]').forEach((btn) => {
-    btn.addEventListener('click', () => saveAdminOrder(btn));
+  panel.querySelectorAll(".admin-order [data-admin-save]").forEach((btn) => {
+    btn.addEventListener("click", () => saveAdminOrder(btn));
   });
-  panel.querySelectorAll('.admin-order [data-admin-view]').forEach((btn) => {
-    btn.addEventListener('click', () => openAdminOrderDetail(btn.dataset.adminView));
+  panel.querySelectorAll(".admin-order [data-admin-view]").forEach((btn) => {
+    btn.addEventListener("click", () =>
+      openAdminOrderDetail(btn.dataset.adminView),
+    );
   });
 }
 
@@ -668,27 +716,27 @@ function adminOrderCardMarkup(o) {
   const tracking = o.tracking || {};
   const items = (o.items || [])
     .map((i) => `${sanitize(i.name)} ×${i.qty}`)
-    .join(' · ');
+    .join(" · ");
 
   const nextStatuses = allowedNextStatuses(meta.id);
   const statusOptions = [meta.id]
     .concat(nextStatuses)
     .map((id) => {
       const s = statusMeta(id);
-      const suffix = id === meta.id ? ' (current)' : '';
-      return `<option value="${s.id}" ${id === meta.id ? 'selected' : ''}>${s.label}${suffix}</option>`;
+      const suffix = id === meta.id ? " (current)" : "";
+      return `<option value="${s.id}" ${id === meta.id ? "selected" : ""}>${s.label}${suffix}</option>`;
     })
-    .join('');
+    .join("");
 
   return `
     <article class="card admin-order" data-order="${sanitize(o.id)}">
       <div class="admin-order-head">
         <div>
-          <a class="order-id" href="orders.html?id=${encodeURIComponent(o.id)}">${sanitize(o.id)}</a>
+          <button type="button" class="link-btn order-id" data-admin-view="${sanitize(o.id)}">${sanitize(o.id)}</button>
           <span class="muted small"> · ${sanitize(o.date)}</span>
-          <div class="muted small">${sanitize(o.customer ? o.customer.name : '')} · ${sanitize(
-    o.customer ? o.customer.phone : ''
-  )} · ${sanitize(o.customer ? o.customer.address : '')}</div>
+          <div class="muted small">${sanitize(o.customer ? o.customer.name : "")} · ${sanitize(
+            o.customer ? o.customer.phone : "",
+          )} · ${sanitize(o.customer ? o.customer.address : "")}</div>
         </div>
         <div class="admin-order-head-right">
           <span class="status ${meta.className}">${meta.label}</span>
@@ -702,15 +750,15 @@ function adminOrderCardMarkup(o) {
         <button type="button" class="btn btn-sm btn-outline" data-admin-view="${sanitize(o.id)}">View details</button>
         <label class="sr-only" for="admin-status-${sanitize(o.id)}">New status</label>
         <select id="admin-status-${sanitize(o.id)}" class="select select-sm admin-status-select"
-          ${nextStatuses.length ? '' : 'disabled'}>${statusOptions}</select>
+          ${nextStatuses.length ? "" : "disabled"}>${statusOptions}</select>
 
         <label class="sr-only" for="admin-track-${sanitize(o.id)}">Tracking number</label>
         <input type="text" class="input admin-tracking" placeholder="Tracking no."
-          maxlength="80" value="${sanitize(tracking.number || '')}" />
+          maxlength="80" value="${sanitize(tracking.number || "")}" />
 
         <label class="sr-only" for="admin-courier-${sanitize(o.id)}">Courier</label>
         <input type="text" class="input admin-courier" placeholder="Courier (e.g. J&T)"
-          maxlength="80" value="${sanitize(tracking.courier || '')}" />
+          maxlength="80" value="${sanitize(tracking.courier || "")}" />
 
         <button type="button" class="btn btn-sm btn-primary" data-admin-save>Update</button>
       </div>
@@ -720,8 +768,8 @@ function adminOrderCardMarkup(o) {
 function openAdminOrderDetail(orderId) {
   const order = getOrderById(orderId);
   if (!order) {
-    adminBanner('Order not found.', true);
-    toast('Order not found.', 'error');
+    adminBanner("Order not found.", true);
+    toast("Order not found.", "error");
     return;
   }
 
@@ -740,16 +788,16 @@ function openAdminOrderDetail(orderId) {
           return `
             <div class="admin-detail-item">
               <span class="admin-detail-item-name">
-                <b>${sanitize(item.name || 'Item')}</b>
-                <span class="muted small">${sanitize(seller ? seller.storeName : '')}${
-                  item.productId ? ' · ' + sanitize(item.productId) : ''
+                <b>${sanitize(item.name || "Item")}</b>
+                <span class="muted small">${sanitize(seller ? seller.storeName : "")}${
+                  item.productId ? " · " + sanitize(item.productId) : ""
                 }</span>
               </span>
               <span class="muted small">${qty} × ${formatPrice(price)}</span>
               <b>${formatPrice(price * qty)}</b>
             </div>`;
         })
-        .join('')
+        .join("")
     : '<p class="muted small">No item snapshot saved.</p>';
 
   const historyRows = history.length
@@ -758,14 +806,14 @@ function openAdminOrderDetail(orderId) {
           (entry) => `
           <li class="admin-detail-history-row">
             <span class="status ${statusMeta(entry.status).className}">${sanitize(
-              statusMeta(entry.status).label
+              statusMeta(entry.status).label,
             )}</span>
             <span class="muted small">${sanitize(formatOrderDate(entry.at))} · ${sanitize(
-              entry.by || 'system'
-            )}${entry.note ? ' · ' + sanitize(entry.note) : ''}</span>
-          </li>`
+              entry.by || "system",
+            )}${entry.note ? " · " + sanitize(entry.note) : ""}</span>
+          </li>`,
         )
-        .join('')
+        .join("")
     : '<li class="muted small">No status history saved.</li>';
 
   openModal(
@@ -774,7 +822,7 @@ function openAdminOrderDetail(orderId) {
       <div class="admin-order-detail-head">
         <div>
           <h3>Order ${sanitize(order.id)}</h3>
-          <p class="muted small">${sanitize(order.date || '')} · ${adminDemoBadge()}</p>
+          <p class="muted small">${sanitize(order.date || "")} · ${adminDemoBadge()}</p>
         </div>
         <span class="status ${meta.className}">${meta.label}</span>
       </div>
@@ -782,25 +830,28 @@ function openAdminOrderDetail(orderId) {
       <div class="admin-detail-grid">
         <section>
           <h4>Customer snapshot</h4>
-          <p><b>${sanitize(customer.name || 'Guest')}</b><br />
-          ${sanitize(customer.phone || 'No phone saved')}<br />
-          ${sanitize(customer.address || 'No address saved')}</p>
-          ${customer.note ? `<p class="muted small">Note: ${sanitize(customer.note)}</p>` : ''}
+          <p><b>${sanitize(customer.name || "Guest")}</b><br />
+          ${sanitize(customer.phone || "No phone saved")}<br />
+          ${sanitize(customer.address || "No address saved")}</p>
+          ${customer.note ? `<p class="muted small">Note: ${sanitize(customer.note)}</p>` : ""}
         </section>
         <section>
           <h4>Payment / delivery</h4>
-          <p>${sanitize(order.payment || customer.payment || 'Cash on delivery')}<br />
+          <p>${sanitize(order.payment || customer.payment || "Cash on delivery")}<br />
           <span class="muted small">Payment status: ${sanitize(
-            order.paymentStatus || 'not recorded'
+            order.paymentStatus || "not recorded",
           )}</span><br />
           <span class="muted small">Delivery: ${sanitize(
-            (findShippingMethod(order.shippingMethod) || {}).label || 'Standard delivery'
-          )}${order.deliveryBy ? ' · target ' + sanitize(order.deliveryBy) : ''}</span></p>
+            (findShippingMethod(order.shippingMethod) || {}).label ||
+              "Standard delivery",
+          )}${order.deliveryBy ? " · target " + sanitize(order.deliveryBy) : ""}</span></p>
           <p class="muted small">${
             tracking.number || tracking.courier
-              ? 'Tracking: ' +
-                sanitize([tracking.courier, tracking.number].filter(Boolean).join(' '))
-              : 'No tracking reference saved.'
+              ? "Tracking: " +
+                sanitize(
+                  [tracking.courier, tracking.number].filter(Boolean).join(" "),
+                )
+              : "No tracking reference saved."
           }</p>
         </section>
       </div>
@@ -813,7 +864,7 @@ function openAdminOrderDetail(orderId) {
         ${
           Number(order.discount) > 0
             ? `<span>Discount <b>−${formatPrice(order.discount)}</b></span>`
-            : ''
+            : ""
         }
         <span>Delivery <b>${formatPrice(order.shipping)}</b></span>
         <span class="admin-detail-grand">Total <b>${formatPrice(order.total)}</b></span>
@@ -831,34 +882,38 @@ function openAdminOrderDetail(orderId) {
         <button type="button" class="btn btn-outline" data-action="close-modal">Close</button>
       </div>
     </div>`,
-    { size: 'lg' }
+    { size: "lg" },
   );
 }
 
 function saveAdminOrder(btn) {
-  const card = btn.closest('.admin-order');
+  const card = btn.closest(".admin-order");
   if (!card) return;
   const orderId = card.dataset.order;
   const order = getOrderById(orderId);
   if (!order) return;
 
-  const select = card.querySelector('.admin-status-select');
-  const numberInput = card.querySelector('.admin-tracking');
-  const courierInput = card.querySelector('.admin-courier');
-  const number = numberInput ? numberInput.value.trim() : '';
-  const courier = courierInput ? courierInput.value.trim() : '';
+  const select = card.querySelector(".admin-status-select");
+  const numberInput = card.querySelector(".admin-tracking");
+  const courierInput = card.querySelector(".admin-courier");
+  const number = numberInput ? numberInput.value.trim() : "";
+  const courier = courierInput ? courierInput.value.trim() : "";
 
   if (number.length > 80 || courier.length > 80) {
-    toast('Tracking number and courier must be 80 characters or fewer.', 'error');
+    toast(
+      "Tracking number and courier must be 80 characters or fewer.",
+      "error",
+    );
     return;
   }
 
   const patch = {};
-  if (select && select.value !== normalizeOrderStatus(order)) patch.status = select.value;
+  if (select && select.value !== normalizeOrderStatus(order))
+    patch.status = select.value;
   if (number || courier || order.tracking) patch.tracking = { number, courier };
 
   if (!patch.status && !patch.tracking) {
-    toast('Nothing to update', 'error');
+    toast("Nothing to update", "error");
     return;
   }
 
@@ -869,23 +924,27 @@ function saveAdminOrder(btn) {
 
     if (!result.ok) {
       adminBanner(result.error, true);
-      toast(result.error, 'error');
+      toast(result.error, "error");
       return;
     }
 
-    adminBanner(`Order ${orderId} updated. The customer's saved history now shows the new status.`);
-    toast(`Order ${orderId} updated`, 'success');
+    adminBanner(
+      `Order ${orderId} updated. The customer's saved history now shows the new status.`,
+    );
+    toast(`Order ${orderId} updated`, "success");
     renderAdminPanel();
   };
 
-  if (patch.status === 'cancelled' || patch.status === 'return_requested') {
+  if (patch.status === "cancelled" || patch.status === "return_requested") {
     confirmDialog(
-      patch.status === 'cancelled' ? 'Cancel this order?' : 'Mark this return as requested?',
-      patch.status === 'cancelled'
-        ? 'Cancelling releases the reserved stock and is final. The customer will see the cancelled status in their order history.'
-        : 'This is a final status and cannot be reopened. The customer will see it in their order history.',
-      patch.status === 'cancelled' ? 'Cancel order' : 'Set return requested',
-      commit
+      patch.status === "cancelled"
+        ? "Cancel this order?"
+        : "Mark this return as requested?",
+      patch.status === "cancelled"
+        ? "Cancelling releases the reserved stock and is final. The customer will see the cancelled status in their order history."
+        : "This is a final status and cannot be reopened. The customer will see it in their order history.",
+      patch.status === "cancelled" ? "Cancel order" : "Set return requested",
+      commit,
     );
     return;
   }
@@ -896,13 +955,14 @@ function saveAdminOrder(btn) {
 /* ---------------- Products ---------------- */
 
 function renderAdminProducts(panel) {
-  const catOptions = ['all']
+  const catOptions = ["all"]
     .concat(categories.map((c) => c.id))
     .map((id) => {
-      const label = id === 'all' ? 'All categories' : (findCategory(id) || {}).name;
-      return `<option value="${id}" ${id === adminProductCategory ? 'selected' : ''}>${sanitize(label)}</option>`;
+      const label =
+        id === "all" ? "All categories" : (findCategory(id) || {}).name;
+      return `<option value="${id}" ${id === adminProductCategory ? "selected" : ""}>${sanitize(label)}</option>`;
     })
-    .join('');
+    .join("");
 
   panel.innerHTML = `
     <div class="admin-toolbar">
@@ -912,12 +972,12 @@ function renderAdminProducts(panel) {
       <select id="admin-product-category" class="select select-sm">${catOptions}</select>
       <label for="admin-product-stock">Stock</label>
       <select id="admin-product-stock" class="select select-sm">
-        <option value="all" ${adminProductStock === 'all' ? 'selected' : ''}>Any stock</option>
-        <option value="low" ${adminProductStock === 'low' ? 'selected' : ''}>Low (1–5)</option>
-        <option value="out" ${adminProductStock === 'out' ? 'selected' : ''}>Sold out</option>
+        <option value="all" ${adminProductStock === "all" ? "selected" : ""}>Any stock</option>
+        <option value="low" ${adminProductStock === "low" ? "selected" : ""}>Low (1–5)</option>
+        <option value="out" ${adminProductStock === "out" ? "selected" : ""}>Sold out</option>
       </select>
       <label class="admin-check">
-        <input type="checkbox" id="admin-show-hidden" ${adminShowHidden ? 'checked' : ''} />
+        <input type="checkbox" id="admin-show-hidden" ${adminShowHidden ? "checked" : ""} />
         Show archived &amp; removed
       </label>
       <button type="button" class="btn btn-primary btn-sm" id="admin-add-product">+ Add product</button>
@@ -929,81 +989,98 @@ function renderAdminProducts(panel) {
     </p>
     <div id="admin-product-list"></div>`;
 
-  const search = document.getElementById('admin-product-search');
+  const search = document.getElementById("admin-product-search");
   if (search) {
-    search.addEventListener('input', () => {
+    search.addEventListener("input", () => {
       adminProductQuery = search.value;
       refreshAdminProductList();
     });
   }
 
-  const category = document.getElementById('admin-product-category');
+  const category = document.getElementById("admin-product-category");
   if (category) {
-    category.addEventListener('change', () => {
+    category.addEventListener("change", () => {
       adminProductCategory = category.value;
       refreshAdminProductList();
     });
   }
 
-  const stock = document.getElementById('admin-product-stock');
+  const stock = document.getElementById("admin-product-stock");
   if (stock) {
-    stock.addEventListener('change', () => {
+    stock.addEventListener("change", () => {
       adminProductStock = stock.value;
       refreshAdminProductList();
     });
   }
 
-  const showHidden = document.getElementById('admin-show-hidden');
+  const showHidden = document.getElementById("admin-show-hidden");
   if (showHidden) {
-    showHidden.addEventListener('change', () => {
+    showHidden.addEventListener("change", () => {
       adminShowHidden = showHidden.checked;
       refreshAdminProductList();
     });
   }
 
-  const add = document.getElementById('admin-add-product');
-  if (add) add.addEventListener('click', openProductCreator);
+  const add = document.getElementById("admin-add-product");
+  if (add) add.addEventListener("click", openProductCreator);
 
   refreshAdminProductList();
 }
 
 function adminProductMatches(p) {
   if (!adminShowHidden && !isListable(p)) return false;
-  if (adminProductCategory !== 'all' && p.categoryId !== adminProductCategory) return false;
+  if (adminProductCategory !== "all" && p.categoryId !== adminProductCategory)
+    return false;
   const left = productStock(p.id);
-  if (adminProductStock === 'out' && left > 0) return false;
-  if (adminProductStock === 'low' && (left < 1 || left > 5)) return false;
+  if (adminProductStock === "out" && left > 0) return false;
+  if (adminProductStock === "low" && (left < 1 || left > 5)) return false;
   const q = adminProductQuery.trim().toLowerCase();
   if (!q) return true;
   const shop = findSeller(p.sellerId);
   const cat = findCategory(p.categoryId);
-  const haystack = [p.name, p.description || '', shop ? shop.storeName : '', cat ? cat.name : '']
-    .join(' ')
+  const haystack = [
+    p.name,
+    p.description || "",
+    shop ? shop.storeName : "",
+    cat ? cat.name : "",
+  ]
+    .join(" ")
     .toLowerCase();
   return haystack.includes(q);
 }
 
 function refreshAdminProductList() {
-  const list = document.getElementById('admin-product-list');
+  const list = document.getElementById("admin-product-list");
   if (!list) return;
 
   const rows = dedupeById(products).filter(adminProductMatches);
 
   list.innerHTML = rows.length
-    ? rows.map(adminProductRowMarkup).join('')
-    : emptyState('No products match', 'Adjust the search or show hidden listings.');
+    ? rows.map(adminProductRowMarkup).join("")
+    : emptyState(
+        "No products match",
+        "Adjust the search or show hidden listings.",
+      );
 
-  list.querySelectorAll('[data-admin-edit]').forEach((btn) => {
-    btn.addEventListener('click', () => openProductEditor(btn.dataset.adminEdit));
+  list.querySelectorAll("[data-admin-edit]").forEach((btn) => {
+    btn.addEventListener("click", () =>
+      openProductEditor(btn.dataset.adminEdit),
+    );
   });
-  list.querySelectorAll('[data-admin-archive]').forEach((btn) => {
-    btn.addEventListener('click', () => archiveAdminProduct(btn.dataset.adminArchive));
+  list.querySelectorAll("[data-admin-archive]").forEach((btn) => {
+    btn.addEventListener("click", () =>
+      archiveAdminProduct(btn.dataset.adminArchive),
+    );
   });
-  list.querySelectorAll('[data-admin-restore]').forEach((btn) => {
-    btn.addEventListener('click', () => restoreAdminProduct(btn.dataset.adminRestore));
+  list.querySelectorAll("[data-admin-restore]").forEach((btn) => {
+    btn.addEventListener("click", () =>
+      restoreAdminProduct(btn.dataset.adminRestore),
+    );
   });
-  list.querySelectorAll('[data-admin-remove]').forEach((btn) => {
-    btn.addEventListener('click', () => removeAdminProduct(btn.dataset.adminRemove));
+  list.querySelectorAll("[data-admin-remove]").forEach((btn) => {
+    btn.addEventListener("click", () =>
+      removeAdminProduct(btn.dataset.adminRemove),
+    );
   });
 }
 
@@ -1018,34 +1095,35 @@ function adminProductRowMarkup(p) {
     : p.archived
       ? '<span class="stock-chip stock-warn">Archived</span>'
       : '<span class="stock-chip stock-ok">Live</span>';
-  const stockChip = left <= 0
-    ? '<span class="stock-chip stock-out">Sold out</span>'
-    : left <= 5
-      ? `<span class="stock-chip stock-warn">${left} left</span>`
-      : `<span class="stock-chip">${left} in stock</span>`;
+  const stockChip =
+    left <= 0
+      ? '<span class="stock-chip stock-out">Sold out</span>'
+      : left <= 5
+        ? `<span class="stock-chip stock-warn">${left} left</span>`
+        : `<span class="stock-chip">${left} in stock</span>`;
   const refChip = references
     ? `<span class="stock-chip" title="Saved orders reference this product">${
         references
-      } order${references === 1 ? '' : 's'}</span>`
-    : '';
+      } order${references === 1 ? "" : "s"}</span>`
+    : "";
 
   const restoreBtn =
     p.archived || p.removed
       ? `<button type="button" class="btn btn-sm btn-outline" data-admin-restore="${sanitize(
-          p.id
+          p.id,
         )}">Restore</button>`
       : `<button type="button" class="btn btn-sm btn-outline" data-admin-archive="${sanitize(
-          p.id
+          p.id,
         )}">Archive</button>`;
 
   /* Products referenced by saved orders keep an archive action instead of a
      permanent delete so old order records still resolve to a real listing. */
   const removeBtn =
     p.removed || references
-      ? ''
+      ? ""
       : `<button type="button" class="btn btn-sm btn-outline btn-danger-text" data-admin-remove="${sanitize(
-          p.id
-        )}">${custom ? 'Delete' : 'Remove'}</button>`;
+          p.id,
+        )}">${custom ? "Delete" : "Remove"}</button>`;
 
   return `
     <div class="card admin-row" data-product-row="${sanitize(p.id)}">
@@ -1055,19 +1133,19 @@ function adminProductRowMarkup(p) {
           p.photo
             ? `<img src="${photoUrl(p.photo, 120)}" alt="" loading="lazy"
                  onload="this.classList.add('is-loaded')" onerror="this.remove()" />`
-            : ''
+            : ""
         }
       </span>
       <div class="admin-row-main">
-        <a href="${productHref(p)}"><b>${sanitize(p.name)}</b></a>
-        <span class="muted small">${sanitize(shop ? shop.storeName : '')} · ${sanitize(
-          cat ? cat.name : ''
-        )} · ${formatPrice(p.price)}${p.compareAt ? ` <s>${formatPrice(p.compareAt)}</s>` : ''}</span>
+        <button type="button" class="link-btn" data-admin-edit="${sanitize(p.id)}"><b>${sanitize(p.name)}</b></button>
+        <span class="muted small">${sanitize(shop ? shop.storeName : "")} · ${sanitize(
+          cat ? cat.name : "",
+        )} · ${formatPrice(p.price)}${p.compareAt ? ` <s>${formatPrice(p.compareAt)}</s>` : ""}</span>
       </div>
       <div class="admin-row-meta">${stateChip} ${stockChip} ${refChip}</div>
       <div class="admin-row-actions">
         <button type="button" class="btn btn-sm btn-outline" data-admin-edit="${sanitize(
-          p.id
+          p.id,
         )}">Edit</button>
         ${restoreBtn}
         ${removeBtn}
@@ -1078,10 +1156,10 @@ function adminProductRowMarkup(p) {
 function adminProductOp(result, successMessage) {
   if (!result.ok) {
     adminBanner(result.error, true);
-    toast(result.error, 'error');
+    toast(result.error, "error");
     return false;
   }
-  toast(successMessage, 'success');
+  toast(successMessage, "success");
   refreshAdminProductList();
   return true;
 }
@@ -1089,21 +1167,25 @@ function adminProductOp(result, successMessage) {
 function archiveAdminProduct(productId) {
   const references = productOrderReferenceCount(productId);
   confirmDialog(
-    'Archive this product?',
+    "Archive this product?",
     `It disappears from the storefront immediately. ${
       references
-        ? `${references} saved order${references === 1 ? '' : 's'} still reference it, so archiving keeps those records intact. `
-        : ''
+        ? `${references} saved order${references === 1 ? "" : "s"} still reference it, so archiving keeps those records intact. `
+        : ""
     }You can restore it any time.`,
-    'Archive',
-    () => adminProductOp(saveCatalogOverride(productId, { archived: true }), 'Product archived')
+    "Archive",
+    () =>
+      adminProductOp(
+        saveCatalogOverride(productId, { archived: true }),
+        "Product archived",
+      ),
   );
 }
 
 function restoreAdminProduct(productId) {
   adminProductOp(
     saveCatalogOverride(productId, { archived: false, removed: false }),
-    'Product restored to the storefront'
+    "Product restored to the storefront",
   );
 }
 
@@ -1113,32 +1195,35 @@ function removeAdminProduct(productId) {
   if (references > 0) {
     toast(
       `This product appears in ${references} saved order${
-        references === 1 ? '' : 's'
+        references === 1 ? "" : "s"
       }. Archive it instead so order history keeps a valid reference.`,
-      'error'
+      "error",
     );
     return;
   }
   confirmDialog(
-    custom ? 'Delete this product?' : 'Remove this product?',
+    custom ? "Delete this product?" : "Remove this product?",
     custom
-      ? 'This listing was added in the dashboard and will be deleted permanently. No saved order references it.'
-      : 'It disappears from the storefront. Past orders keep their snapshot, and you can restore it later.',
-    custom ? 'Delete permanently' : 'Remove',
+      ? "This listing was added in the dashboard and will be deleted permanently. No saved order references it."
+      : "It disappears from the storefront. Past orders keep their snapshot, and you can restore it later.",
+    custom ? "Delete permanently" : "Remove",
     () => {
       const result = removeProduct(productId);
-      adminProductOp(result, custom ? 'Product deleted' : 'Product removed');
-    }
+      adminProductOp(result, custom ? "Product deleted" : "Product removed");
+    },
   );
 }
 
 function adminPhotoPreviewMarkup(value, name) {
-  const initial = String(name || '').trim().charAt(0) || '?';
+  const initial =
+    String(name || "")
+      .trim()
+      .charAt(0) || "?";
   return `<span class="pc-letter" aria-hidden="true">${sanitize(initial)}</span>${
     value
       ? `<img src="${photoUrl(value, 320)}" alt="Product photo preview" loading="lazy"
            onload="this.classList.add('is-loaded')" onerror="this.remove()" />`
-      : ''
+      : ""
   }`;
 }
 
@@ -1148,22 +1233,22 @@ function wireAdminPhotoPreview(inputId, previewId, nameId, colorsFor) {
   if (!input || !preview) return;
   const refresh = () => {
     const nameInput = nameId ? document.getElementById(nameId) : null;
-    const colors = typeof colorsFor === 'function' ? colorsFor() : colorsFor;
-    if (colors) preview.setAttribute('style', gradient(colors));
+    const colors = typeof colorsFor === "function" ? colorsFor() : colorsFor;
+    if (colors) preview.setAttribute("style", gradient(colors));
     preview.innerHTML = adminPhotoPreviewMarkup(
       input.value.trim(),
-      nameInput ? nameInput.value : ''
+      nameInput ? nameInput.value : "",
     );
   };
-  input.addEventListener('input', refresh);
+  input.addEventListener("input", refresh);
   const nameInput = nameId ? document.getElementById(nameId) : null;
-  if (nameInput) nameInput.addEventListener('input', refresh);
+  if (nameInput) nameInput.addEventListener("input", refresh);
 }
 
 function adminFocusFirstInvalid(ids) {
   const first = ids.find((id) => {
     const field = document.getElementById(id);
-    return field && field.getAttribute('aria-invalid') === 'true';
+    return field && field.getAttribute("aria-invalid") === "true";
   });
   const field = first ? document.getElementById(first) : null;
   if (field) field.focus();
@@ -1173,50 +1258,72 @@ function adminFocusFirstInvalid(ids) {
    field passes; field errors are already painted by then. */
 function adminValidateProductFields(input) {
   let ok = true;
-  const name = String(input.name || '').trim();
+  const name = String(input.name || "").trim();
   const price = Number(input.priceRaw);
   const stock = Number(input.stockRaw);
-  const compareRaw = String(input.compareRaw == null ? '' : input.compareRaw).trim();
-  const compareAt = compareRaw === '' ? 0 : Number(compareRaw);
-  const priceRawText = String(input.priceRaw == null ? '' : input.priceRaw).trim();
-  const stockRawText = String(input.stockRaw == null ? '' : input.stockRaw).trim();
+  const compareRaw = String(
+    input.compareRaw == null ? "" : input.compareRaw,
+  ).trim();
+  const compareAt = compareRaw === "" ? 0 : Number(compareRaw);
+  const priceRawText = String(
+    input.priceRaw == null ? "" : input.priceRaw,
+  ).trim();
+  const stockRawText = String(
+    input.stockRaw == null ? "" : input.stockRaw,
+  ).trim();
 
-  if (setAuthFieldError(input.prefix + '-name', !name ? 'Enter a product name.' : name.length > 120 ? 'Keep the name to 120 characters or fewer.' : '')) ok = false;
   if (
     setAuthFieldError(
-      input.prefix + '-price',
+      input.prefix + "-name",
+      !name
+        ? "Enter a product name."
+        : name.length > 120
+          ? "Keep the name to 120 characters or fewer."
+          : "",
+    )
+  )
+    ok = false;
+  if (
+    setAuthFieldError(
+      input.prefix + "-price",
       !priceRawText || !Number.isFinite(price) || price < 0 || price > 10000000
-        ? 'Enter a price between ₱0 and ₱10,000,000.'
-        : ''
+        ? "Enter a price between ₱0 and ₱10,000,000."
+        : "",
     )
   ) {
     ok = false;
   }
   if (
     setAuthFieldError(
-      input.prefix + '-stock',
+      input.prefix + "-stock",
       !stockRawText || !Number.isInteger(stock) || stock < 0 || stock > 1000000
-        ? 'Enter a whole number of units between 0 and 1,000,000.'
-        : ''
+        ? "Enter a whole number of units between 0 and 1,000,000."
+        : "",
     )
   ) {
     ok = false;
   }
-  if (input.prefix === 'pe') {
+  if (input.prefix === "pe") {
     if (
       setAuthFieldError(
-        'pe-compare',
-        compareRaw !== '' && (!Number.isFinite(compareAt) || compareAt <= 0)
-          ? 'Enter a compare-at price above zero, or leave it empty.'
-          : compareRaw !== '' && compareAt <= price
-            ? 'Compare-at price must be higher than the selling price.'
-            : ''
+        "pe-compare",
+        compareRaw !== "" && (!Number.isFinite(compareAt) || compareAt <= 0)
+          ? "Enter a compare-at price above zero, or leave it empty."
+          : compareRaw !== "" && compareAt <= price
+            ? "Compare-at price must be higher than the selling price."
+            : "",
       )
     ) {
       ok = false;
     }
   }
-  if (!ok) adminFocusFirstInvalid([input.prefix + '-name', input.prefix + '-price', input.prefix + '-stock', 'pe-compare']);
+  if (!ok)
+    adminFocusFirstInvalid([
+      input.prefix + "-name",
+      input.prefix + "-price",
+      input.prefix + "-stock",
+      "pe-compare",
+    ]);
   return ok;
 }
 
@@ -1243,7 +1350,7 @@ function openProductEditor(productId) {
           <div class="form-group">
             <label for="pe-compare">Compare-at (₱)</label>
             <input type="number" id="pe-compare" class="input" min="0" max="10000000" step="1" value="${
-              p.compareAt || ''
+              p.compareAt || ""
             }" placeholder="Leave empty for none" />
             <p class="field-error hidden" id="pe-compare-error"></p>
           </div>
@@ -1260,11 +1367,11 @@ function openProductEditor(productId) {
               ${categories
                 .map(
                   (c) =>
-                    `<option value="${c.id}" ${c.id === p.categoryId ? 'selected' : ''}>${sanitize(
-                      c.name
-                    )}</option>`
+                    `<option value="${c.id}" ${c.id === p.categoryId ? "selected" : ""}>${sanitize(
+                      c.name,
+                    )}</option>`,
                 )
-                .join('')}
+                .join("")}
             </select>
           </div>
           <div class="form-group">
@@ -1273,11 +1380,11 @@ function openProductEditor(productId) {
               ${sellers
                 .map(
                   (s) =>
-                    `<option value="${s.id}" ${s.id === p.sellerId ? 'selected' : ''}>${sanitize(
-                      s.storeName
-                    )}</option>`
+                    `<option value="${s.id}" ${s.id === p.sellerId ? "selected" : ""}>${sanitize(
+                      s.storeName,
+                    )}</option>`,
                 )
-                .join('')}
+                .join("")}
             </select>
           </div>
         </div>
@@ -1289,7 +1396,7 @@ function openProductEditor(productId) {
               ${adminPhotoPreviewMarkup(p.photo, p.name)}
             </div>
             <div class="admin-photo-fields">
-              <input type="text" id="pe-photo" class="input" value="${sanitize(p.photo || '')}"
+              <input type="text" id="pe-photo" class="input" value="${sanitize(p.photo || "")}"
                 placeholder="Unsplash photo ID or https://…" />
               <p class="muted small form-hint">Leave empty to show the coloured placeholder tile.</p>
             </div>
@@ -1297,14 +1404,14 @@ function openProductEditor(productId) {
         </div>
         <div class="form-group">
           <label for="pe-materials">Materials</label>
-          <input type="text" id="pe-materials" class="input" value="${sanitize(p.materials || '')}" />
+          <input type="text" id="pe-materials" class="input" value="${sanitize(p.materials || "")}" />
         </div>
         <div class="form-group">
           <label for="pe-description">Description</label>
-          <textarea id="pe-description" class="textarea" rows="4">${sanitize(p.description || '')}</textarea>
+          <textarea id="pe-description" class="textarea" rows="4">${sanitize(p.description || "")}</textarea>
         </div>
         <label class="admin-check">
-          <input type="checkbox" id="pe-freeship" ${p.freeShipping ? 'checked' : ''} />
+          <input type="checkbox" id="pe-freeship" ${p.freeShipping ? "checked" : ""} />
           Free nationwide delivery
         </label>
         <div class="modal-actions">
@@ -1314,44 +1421,53 @@ function openProductEditor(productId) {
       </form>
     </div>`);
 
-  const form = document.getElementById('pe-form');
+  const form = document.getElementById("pe-form");
   if (!form) return;
 
-  wireAdminPhotoPreview('pe-photo', 'pe-photo-preview', 'pe-name', () =>
-    categoryColors((document.getElementById('pe-category') || {}).value)
+  wireAdminPhotoPreview("pe-photo", "pe-photo-preview", "pe-name", () =>
+    categoryColors((document.getElementById("pe-category") || {}).value),
   );
-  const peCategory = document.getElementById('pe-category');
+  const peCategory = document.getElementById("pe-category");
   if (peCategory) {
-    peCategory.addEventListener('change', () => {
-      const preview = document.getElementById('pe-photo-preview');
-      if (preview) preview.setAttribute('style', gradient(categoryColors(peCategory.value)));
+    peCategory.addEventListener("change", () => {
+      const preview = document.getElementById("pe-photo-preview");
+      if (preview)
+        preview.setAttribute(
+          "style",
+          gradient(categoryColors(peCategory.value)),
+        );
     });
   }
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const name = (document.getElementById('pe-name') || {}).value || '';
-    const priceRaw = (document.getElementById('pe-price') || {}).value;
-    const compareRaw = (document.getElementById('pe-compare') || {}).value;
-    const stockRaw = (document.getElementById('pe-stock') || {}).value;
-    const materials = (document.getElementById('pe-materials') || {}).value || '';
-    const description = (document.getElementById('pe-description') || {}).value || '';
-    const photo = (document.getElementById('pe-photo') || {}).value || '';
-    const categoryId = (document.getElementById('pe-category') || {}).value || '';
-    const sellerId = (document.getElementById('pe-shop') || {}).value || '';
-    const freeShipping = Boolean((document.getElementById('pe-freeship') || {}).checked);
+    const name = (document.getElementById("pe-name") || {}).value || "";
+    const priceRaw = (document.getElementById("pe-price") || {}).value;
+    const compareRaw = (document.getElementById("pe-compare") || {}).value;
+    const stockRaw = (document.getElementById("pe-stock") || {}).value;
+    const materials =
+      (document.getElementById("pe-materials") || {}).value || "";
+    const description =
+      (document.getElementById("pe-description") || {}).value || "";
+    const photo = (document.getElementById("pe-photo") || {}).value || "";
+    const categoryId =
+      (document.getElementById("pe-category") || {}).value || "";
+    const sellerId = (document.getElementById("pe-shop") || {}).value || "";
+    const freeShipping = Boolean(
+      (document.getElementById("pe-freeship") || {}).checked,
+    );
 
     const price = Number(priceRaw);
     const stock = Number(stockRaw);
-    const compareAt = String(compareRaw).trim() === '' ? 0 : Number(compareRaw);
+    const compareAt = String(compareRaw).trim() === "" ? 0 : Number(compareRaw);
 
     if (
       !adminValidateProductFields({
-        prefix: 'pe',
+        prefix: "pe",
         name,
         priceRaw,
         stockRaw,
-        compareRaw
+        compareRaw,
       })
     ) {
       return;
@@ -1367,17 +1483,17 @@ function openProductEditor(productId) {
       photo: photo.trim(),
       categoryId,
       sellerId,
-      freeShipping
+      freeShipping,
     });
 
     if (!result.ok) {
       adminBanner(result.error, true);
-      toast(result.error, 'error');
+      toast(result.error, "error");
       return;
     }
 
     closeModal();
-    toast('Product updated', 'success');
+    toast("Product updated", "success");
     refreshAdminProductList();
   });
 }
@@ -1385,10 +1501,10 @@ function openProductEditor(productId) {
 function openProductCreator() {
   const catOptions = categories
     .map((c) => `<option value="${c.id}">${sanitize(c.name)}</option>`)
-    .join('');
+    .join("");
   const shopOptions = sellers
     .map((s) => `<option value="${s.id}">${sanitize(s.storeName)}</option>`)
-    .join('');
+    .join("");
 
   openModal(`
     <div class="modal-pad">
@@ -1441,7 +1557,7 @@ function openProductCreator() {
           <div class="admin-photo-row">
             <div class="pc-media admin-photo-preview" id="pc-photo-preview" aria-hidden="true"
               style="${gradient(categoryColors(categories[0].id))}">
-              ${adminPhotoPreviewMarkup('', '')}
+              ${adminPhotoPreviewMarkup("", "")}
             </div>
             <div class="admin-photo-fields">
               <input type="text" id="pc-photo" class="input" placeholder="photo-1602874801006-… or https://…" />
@@ -1460,35 +1576,41 @@ function openProductCreator() {
       </form>
     </div>`);
 
-  const form = document.getElementById('pc-form');
+  const form = document.getElementById("pc-form");
   if (!form) return;
 
-  wireAdminPhotoPreview('pc-photo', 'pc-photo-preview', 'pc-name', () =>
-    categoryColors((document.getElementById('pc-category') || {}).value)
+  wireAdminPhotoPreview("pc-photo", "pc-photo-preview", "pc-name", () =>
+    categoryColors((document.getElementById("pc-category") || {}).value),
   );
-  const pcCategory = document.getElementById('pc-category');
+  const pcCategory = document.getElementById("pc-category");
   if (pcCategory) {
-    pcCategory.addEventListener('change', () => {
-      const preview = document.getElementById('pc-photo-preview');
-      if (preview) preview.setAttribute('style', gradient(categoryColors(pcCategory.value)));
+    pcCategory.addEventListener("change", () => {
+      const preview = document.getElementById("pc-photo-preview");
+      if (preview)
+        preview.setAttribute(
+          "style",
+          gradient(categoryColors(pcCategory.value)),
+        );
     });
   }
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const name = ((document.getElementById('pc-name') || {}).value || '').trim();
-    const priceRaw = (document.getElementById('pc-price') || {}).value;
-    const stockRaw = (document.getElementById('pc-stock') || {}).value;
+    const name = (
+      (document.getElementById("pc-name") || {}).value || ""
+    ).trim();
+    const priceRaw = (document.getElementById("pc-price") || {}).value;
+    const stockRaw = (document.getElementById("pc-stock") || {}).value;
     const price = Number(priceRaw);
     const stock = Number(stockRaw);
 
     if (
       !adminValidateProductFields({
-        prefix: 'pc',
+        prefix: "pc",
         name,
         priceRaw,
         stockRaw,
-        compareRaw: ''
+        compareRaw: "",
       })
     ) {
       return;
@@ -1498,22 +1620,30 @@ function openProductCreator() {
       name,
       price,
       stock,
-      categoryId: (document.getElementById('pc-category') || {}).value || '',
-      sellerId: (document.getElementById('pc-shop') || {}).value || '',
-      materials: ((document.getElementById('pc-materials') || {}).value || '').trim(),
-      processing: ((document.getElementById('pc-processing') || {}).value || '').trim(),
-      description: ((document.getElementById('pc-description') || {}).value || '').trim(),
-      photo: ((document.getElementById('pc-photo') || {}).value || '').trim(),
-      freeShipping: Boolean((document.getElementById('pc-freeship') || {}).checked)
+      categoryId: (document.getElementById("pc-category") || {}).value || "",
+      sellerId: (document.getElementById("pc-shop") || {}).value || "",
+      materials: (
+        (document.getElementById("pc-materials") || {}).value || ""
+      ).trim(),
+      processing: (
+        (document.getElementById("pc-processing") || {}).value || ""
+      ).trim(),
+      description: (
+        (document.getElementById("pc-description") || {}).value || ""
+      ).trim(),
+      photo: ((document.getElementById("pc-photo") || {}).value || "").trim(),
+      freeShipping: Boolean(
+        (document.getElementById("pc-freeship") || {}).checked,
+      ),
     });
 
     if (!result.ok) {
-      toast(result.error, 'error');
+      toast(result.error, "error");
       return;
     }
 
     closeModal();
-    toast(`“${result.product.name}” added to the storefront`, 'success');
+    toast(`“${result.product.name}” added to the storefront`, "success");
     refreshAdminProductList();
   });
 }
@@ -1539,7 +1669,7 @@ function renderAdminShops(panel) {
             <h3>${sanitize(s.storeName)}</h3>
             <span class="muted small">${productsBySeller(s.id).length} live ${plural(
               productsBySeller(s.id).length,
-              'listing'
+              "listing",
             )}</span>
           </div>
           <div class="form-group">
@@ -1558,52 +1688,56 @@ function renderAdminShops(panel) {
               maxlength="80" value="${sanitize(s.location)}" />
           </div>
           <button type="button" class="btn btn-sm btn-primary" data-admin-shop-save>Save shop</button>
-        </section>`
+        </section>`,
         )
-        .join('')}
+        .join("")}
     </div>`;
 
-  panel.querySelectorAll('[data-admin-shop-save]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const card = btn.closest('[data-shop]');
+  panel.querySelectorAll("[data-admin-shop-save]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const card = btn.closest("[data-shop]");
       if (!card) return;
-      const name = (card.querySelector('.admin-shop-name') || {}).value || '';
-      const tagline = (card.querySelector('.admin-shop-tagline') || {}).value || '';
-      const location = (card.querySelector('.admin-shop-location') || {}).value || '';
+      const name = (card.querySelector(".admin-shop-name") || {}).value || "";
+      const tagline =
+        (card.querySelector(".admin-shop-tagline") || {}).value || "";
+      const location =
+        (card.querySelector(".admin-shop-location") || {}).value || "";
 
       if (!name.trim()) {
-        adminBanner('Store name cannot be empty.', true);
-        toast('Store name cannot be empty', 'error');
+        adminBanner("Store name cannot be empty.", true);
+        toast("Store name cannot be empty", "error");
         return;
       }
       if (name.trim().length > 80) {
-        adminBanner('Store name must be 80 characters or fewer.', true);
-        toast('Store name is too long', 'error');
+        adminBanner("Store name must be 80 characters or fewer.", true);
+        toast("Store name is too long", "error");
         return;
       }
       if (tagline.trim().length > 140) {
-        adminBanner('Tagline must be 140 characters or fewer.', true);
-        toast('Tagline is too long', 'error');
+        adminBanner("Tagline must be 140 characters or fewer.", true);
+        toast("Tagline is too long", "error");
         return;
       }
       if (location.trim().length > 80) {
-        adminBanner('Location must be 80 characters or fewer.', true);
-        toast('Location is too long', 'error');
+        adminBanner("Location must be 80 characters or fewer.", true);
+        toast("Location is too long", "error");
         return;
       }
 
       const result = saveShopOverride(card.dataset.shop, {
         storeName: name,
         tagline,
-        location
+        location,
       });
       if (!result.ok) {
         adminBanner(result.error, true);
-        toast(result.error, 'error');
+        toast(result.error, "error");
         return;
       }
-      adminBanner(`Shop ${result.shop.storeName} updated. Linked product cards and storefronts now use these details.`);
-      toast('Shop updated', 'success');
+      adminBanner(
+        `Shop ${result.shop.storeName} updated. Linked product cards and storefronts now use these details.`,
+      );
+      toast("Shop updated", "success");
       refreshAccountChrome();
       renderAdminPanel();
     });
@@ -1613,11 +1747,14 @@ function renderAdminShops(panel) {
 /* ---------------- Customers ---------------- */
 
 function renderAdminCustomers(panel) {
-  const allAccounts = listAccounts().filter((a) => a.role !== 'admin');
+  const allAccounts = listAccounts().filter((a) => a.role !== "admin");
   const needle = adminCustomerQuery.trim().toLowerCase();
   const accounts = needle
     ? allAccounts.filter((a) =>
-        [a.name, a.email, a.firstName, a.lastName].join(' ').toLowerCase().includes(needle)
+        [a.name, a.email, a.firstName, a.lastName]
+          .join(" ")
+          .toLowerCase()
+          .includes(needle),
       )
     : allAccounts;
   const orders = adminOrdersNewestFirst();
@@ -1625,38 +1762,38 @@ function renderAdminCustomers(panel) {
   const rows = accounts.length
     ? accounts
         .map((a) => {
-          const mine = orders.filter((o) => (o.userId || 'guest') === a.id);
+          const mine = orders.filter((o) => (o.userId || "guest") === a.id);
           const spent = mine
-            .filter((o) => normalizeOrderStatus(o) !== 'cancelled')
+            .filter((o) => normalizeOrderStatus(o) !== "cancelled")
             .reduce((sum, o) => sum + (Number(o.total) || 0), 0);
           return `
           <div class="card admin-row" data-account="${sanitize(a.id)}">
             <div class="admin-row-main">
               <b>${sanitize(a.name || a.email)}</b>
               <span class="muted small">${sanitize(a.email)} · joined ${sanitize(
-                String(a.createdAt || '').slice(0, 10)
+                String(a.createdAt || "").slice(0, 10),
               )}</span>
             </div>
             <div class="admin-row-meta">
-              <span class="stock-chip ${a.suspended ? 'stock-out' : 'stock-ok'}">${
-                a.suspended ? 'Suspended' : 'Active'
+              <span class="stock-chip ${a.suspended ? "stock-out" : "stock-ok"}">${
+                a.suspended ? "Suspended" : "Active"
               }</span>
-              <span class="stock-chip">${mine.length} ${plural(mine.length, 'order')} · ${formatPrice(spent)}</span>
+              <span class="stock-chip">${mine.length} ${plural(mine.length, "order")} · ${formatPrice(spent)}</span>
             </div>
             <div class="admin-row-actions">
               <button type="button" class="btn btn-sm btn-outline" data-admin-suspend="${
-                a.suspended ? 'off' : 'on'
-              }">${a.suspended ? 'Reactivate' : 'Suspend'}</button>
+                a.suspended ? "off" : "on"
+              }">${a.suspended ? "Reactivate" : "Suspend"}</button>
               <button type="button" class="btn btn-sm btn-outline btn-danger-text" data-admin-delete>Remove</button>
             </div>
           </div>`;
         })
-        .join('')
+        .join("")
     : emptyState(
-        allAccounts.length ? 'No customer matches' : 'No customer accounts yet',
+        allAccounts.length ? "No customer matches" : "No customer accounts yet",
         allAccounts.length
-          ? 'Try a different name or email.'
-          : 'Accounts appear here as soon as people register.'
+          ? "Try a different name or email."
+          : "Accounts appear here as soon as people register.",
       );
 
   panel.innerHTML = `
@@ -1665,7 +1802,7 @@ function renderAdminCustomers(panel) {
         placeholder="Search customers by name or email…" value="${sanitize(adminCustomerQuery)}" />
       <span class="muted small">${accounts.length} of ${allAccounts.length} ${plural(
         allAccounts.length,
-        'customer'
+        "customer",
       )}</span>
       ${adminDemoBadge()}
     </div>
@@ -1676,12 +1813,12 @@ function renderAdminCustomers(panel) {
     </p>
     ${rows}`;
 
-  const search = document.getElementById('admin-customer-search');
+  const search = document.getElementById("admin-customer-search");
   if (search) {
-    search.addEventListener('input', () => {
+    search.addEventListener("input", () => {
       adminCustomerQuery = search.value;
       renderAdminCustomers(panel);
-      const next = document.getElementById('admin-customer-search');
+      const next = document.getElementById("admin-customer-search");
       if (next) {
         next.focus();
         next.setSelectionRange(next.value.length, next.value.length);
@@ -1689,33 +1826,36 @@ function renderAdminCustomers(panel) {
     });
   }
 
-  panel.querySelectorAll('[data-account]').forEach((row) => {
+  panel.querySelectorAll("[data-account]").forEach((row) => {
     const userId = row.dataset.account;
-    const suspendBtn = row.querySelector('[data-admin-suspend]');
+    const suspendBtn = row.querySelector("[data-admin-suspend]");
     if (suspendBtn) {
-      suspendBtn.addEventListener('click', () => {
-        const suspend = suspendBtn.dataset.adminSuspend === 'on';
+      suspendBtn.addEventListener("click", () => {
+        const suspend = suspendBtn.dataset.adminSuspend === "on";
         const apply = () => {
           const result = setAccountSuspended(userId, suspend);
           if (!result.ok) {
             adminBanner(result.error, true);
-            toast(result.error, 'error');
+            toast(result.error, "error");
             return;
           }
           adminBanner(
             suspend
-              ? 'Account suspended. The customer is signed out and cannot sign in until reactivated.'
-              : 'Account reactivated. The customer can sign in again.'
+              ? "Account suspended. The customer is signed out and cannot sign in until reactivated."
+              : "Account reactivated. The customer can sign in again.",
           );
-          toast(suspend ? 'Account suspended' : 'Account reactivated', 'success');
+          toast(
+            suspend ? "Account suspended" : "Account reactivated",
+            "success",
+          );
           renderAdminPanel();
         };
         if (suspend) {
           confirmDialog(
-            'Suspend this customer?',
-            'They are signed out and cannot sign in or place orders until you reactivate the account. Past orders stay in the system.',
-            'Suspend account',
-            apply
+            "Suspend this customer?",
+            "They are signed out and cannot sign in or place orders until you reactivate the account. Past orders stay in the system.",
+            "Suspend account",
+            apply,
           );
         } else {
           apply();
@@ -1723,24 +1863,24 @@ function renderAdminCustomers(panel) {
       });
     }
 
-    const deleteBtn = row.querySelector('[data-admin-delete]');
+    const deleteBtn = row.querySelector("[data-admin-delete]");
     if (deleteBtn) {
-      deleteBtn.addEventListener('click', () => {
+      deleteBtn.addEventListener("click", () => {
         confirmDialog(
-          'Remove this account?',
-          'The account can no longer sign in. Its saved demo orders stay in the system for your records, so order history is not corrupted.',
-          'Remove account',
+          "Remove this account?",
+          "The account can no longer sign in. Its saved demo orders stay in the system for your records, so order history is not corrupted.",
+          "Remove account",
           () => {
             const result = deleteAccount(userId);
             if (!result.ok) {
               adminBanner(result.error, true);
-              toast(result.error, 'error');
+              toast(result.error, "error");
               return;
             }
-            adminBanner('Account removed. Saved demo orders were kept.');
-            toast('Account removed', 'success');
+            adminBanner("Account removed. Saved demo orders were kept.");
+            toast("Account removed", "success");
             renderAdminPanel();
-          }
+          },
         );
       });
     }
@@ -1750,10 +1890,10 @@ function renderAdminCustomers(panel) {
 /* ---------------- Audit log ---------------- */
 
 function auditMatchesDate(entry) {
-  if (adminAuditDate === 'all') return true;
+  if (adminAuditDate === "all") return true;
   const at = new Date(entry.at).getTime();
   if (!Number.isFinite(at)) return false;
-  if (adminAuditDate === 'today') {
+  if (adminAuditDate === "today") {
     const then = new Date(entry.at);
     const now = new Date();
     return (
@@ -1771,30 +1911,31 @@ function renderAdminAudit(panel) {
   const actions = Array.from(new Set(log.map((e) => e.action))).sort();
   const filtered = log.filter(
     (e) =>
-      (adminAuditFilter === 'all' || e.action === adminAuditFilter) && auditMatchesDate(e)
+      (adminAuditFilter === "all" || e.action === adminAuditFilter) &&
+      auditMatchesDate(e),
   );
 
-  const options = ['all']
+  const options = ["all"]
     .concat(actions)
     .map(
       (action) =>
-        `<option value="${sanitize(action)}" ${action === adminAuditFilter ? 'selected' : ''}>${
-          action === 'all' ? 'All actions' : sanitize(action)
-        }</option>`
+        `<option value="${sanitize(action)}" ${action === adminAuditFilter ? "selected" : ""}>${
+          action === "all" ? "All actions" : sanitize(action)
+        }</option>`,
     )
-    .join('');
+    .join("");
 
   const dateOptions = [
-    ['all', 'All time'],
-    ['today', 'Today'],
-    ['7', 'Last 7 days'],
-    ['30', 'Last 30 days']
+    ["all", "All time"],
+    ["today", "Today"],
+    ["7", "Last 7 days"],
+    ["30", "Last 30 days"],
   ]
     .map(
       ([value, label]) =>
-        `<option value="${value}" ${value === adminAuditDate ? 'selected' : ''}>${label}</option>`
+        `<option value="${value}" ${value === adminAuditDate ? "selected" : ""}>${label}</option>`,
     )
-    .join('');
+    .join("");
 
   panel.innerHTML = `
     <div class="admin-toolbar">
@@ -1802,7 +1943,7 @@ function renderAdminAudit(panel) {
       <select id="admin-audit-filter" class="select select-sm">${options}</select>
       <label for="admin-audit-date">Period</label>
       <select id="admin-audit-date" class="select select-sm">${dateOptions}</select>
-      <span class="muted small">${filtered.length} of ${log.length} ${plural(log.length, 'entry', 'entries')}</span>
+      <span class="muted small">${filtered.length} of ${log.length} ${plural(log.length, "entry", "entries")}</span>
       ${adminDemoBadge()}
     </div>
     <p class="muted small" style="margin: -6px 0 16px">
@@ -1818,32 +1959,32 @@ function renderAdminAudit(panel) {
                 (entry) => `
               <div class="audit-row">
                 <span class="audit-time muted small">${formatOrderDate(entry.at)}</span>
-                <span class="audit-actor">${sanitize(entry.actorLabel || entry.actor || 'system')}</span>
+                <span class="audit-actor">${sanitize(entry.actorLabel || entry.actor || "system")}</span>
                 <span class="audit-action"><code>${sanitize(entry.action)}</code></span>
                 <span class="audit-detail">${sanitize(entry.detail)}</span>
-              </div>`
+              </div>`,
               )
-              .join('')}
+              .join("")}
           </div>`
         : emptyState(
-            'No activity logged yet',
+            "No activity logged yet",
             log.length
-              ? 'No entry matches the current filters.'
-              : 'Administrator actions will appear here as they happen.'
+              ? "No entry matches the current filters."
+              : "Administrator actions will appear here as they happen.",
           )
     }`;
 
-  const filter = document.getElementById('admin-audit-filter');
+  const filter = document.getElementById("admin-audit-filter");
   if (filter) {
-    filter.addEventListener('change', () => {
+    filter.addEventListener("change", () => {
       adminAuditFilter = filter.value;
       renderAdminAudit(panel);
     });
   }
 
-  const dateFilter = document.getElementById('admin-audit-date');
+  const dateFilter = document.getElementById("admin-audit-date");
   if (dateFilter) {
-    dateFilter.addEventListener('change', () => {
+    dateFilter.addEventListener("change", () => {
       adminAuditDate = dateFilter.value;
       renderAdminAudit(panel);
     });

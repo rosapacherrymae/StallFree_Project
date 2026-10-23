@@ -28,17 +28,17 @@ Yes, proceed with Part 01 ONLY. First review docs/implementation-progress.md and
 
 ### Scope overview
 
-| Part | Topic | Stop after |
-|---|---|---|
-| 00 | Baseline and protective setup | Report + request approval for Part 01 |
-| 01 | Foundation and test reliability | Report + request approval for Part 02 |
-| 02 | Single admin and customer authentication | Report + request approval for Part 03 |
-| 03 | Catalog, product details and shop discovery | Report + request approval for Part 04 |
-| 04 | Cart, wishlist and demo checkout | Report + request approval for Part 05 |
-| 05 | Order history, reviews, profile and help | Report + request approval for Part 06 |
-| 06 | Admin dashboard and management | Report + request approval for Part 07 |
-| 07 | Responsive UI, accessibility and demo backup | Report + request approval for Part 08 |
-| 08 | Final testing, documentation and handoff | Report + request approval for Part 09 (optional future work) |
+| Part | Topic                                        | Stop after                                                   |
+| ---- | -------------------------------------------- | ------------------------------------------------------------ |
+| 00   | Baseline and protective setup                | Report + request approval for Part 01                        |
+| 01   | Foundation and test reliability              | Report + request approval for Part 02                        |
+| 02   | Single admin and customer authentication     | Report + request approval for Part 03                        |
+| 03   | Catalog, product details and shop discovery  | Report + request approval for Part 04                        |
+| 04   | Cart, wishlist and demo checkout             | Report + request approval for Part 05                        |
+| 05   | Order history, reviews, profile and help     | Report + request approval for Part 06                        |
+| 06   | Admin dashboard and management               | Report + request approval for Part 07                        |
+| 07   | Responsive UI, accessibility and demo backup | Report + request approval for Part 08                        |
+| 08   | Final testing, documentation and handoff     | Report + request approval for Part 09 (optional future work) |
 
 ---
 
@@ -49,6 +49,7 @@ Yes, proceed with Part 01 ONLY. First review docs/implementation-progress.md and
 **Relevant files:** all root HTML pages, `js/*.js`, `css/styles.css`, `tests/smoke.js`, `tests/package.json`, `README.md`.
 
 **Do only this:**
+
 1. Inspect project structure and existing Git status; do not overwrite uncommitted work. Recommend/create a safe backup or working branch if appropriate and permitted.
 2. Map existing page routing, script load order, auth functions (`adminExists`, `adminSetup`, `requireAdmin`, customer signup), storage keys, carts, orders, and all six admin sections.
 3. Identify available test commands, run baseline automated tests when possible, and manually/static inspect principal navigation flows. Record pass/fail/not tested honestly.
@@ -68,11 +69,12 @@ Yes, proceed with Part 01 ONLY. First review docs/implementation-progress.md and
 **Relevant files:** `admin.html`, `tests/smoke.js`, `tests/package.json`, `tests/package-lock.json` (if present), minimal affected page/scripts, `docs/implementation-progress.md`.
 
 **Do only this:**
+
 1. Remove accidental literal `98` after `</head>` in `admin.html` without changing layout.
 2. Replace hardcoded Windows project path in `tests/smoke.js` with a portable root (e.g. `path.resolve(__dirname,'..')`); adjust any related test assumptions.
 3. Eliminate embedded plaintext owner setup key from shipping tests. Use clearly documented per-run/test-only fixtures or a non-sensitive isolated fixture approach; do not silently break the admin test. Make a note that client-side admin setup is not truly secure.
 4. Pin a compatible `jsdom` dependency version based on actual runtime and commit/update lockfile when appropriate.
-5. Repair directly observed broken links, blocking console errors and basic parsing failures *only if safely scoped*. Handle remaining larger issues as later work or blockers.
+5. Repair directly observed broken links, blocking console errors and basic parsing failures _only if safely scoped_. Handle remaining larger issues as later work or blockers.
 6. Re-run baseline tests and document before/after results and any known failures.
 
 **Completion checks:** admin page valid, tests portable and reproducible, no literal owner credential in distributed test source, no newly broken pages, progress note updated.
@@ -88,6 +90,7 @@ Yes, proceed with Part 01 ONLY. First review docs/implementation-progress.md and
 **Relevant files:** `js/auth.js`, `admin.html`, `login.html`, `register.html`, `js/ui.js` if required, `tests/smoke.js`, progress log.
 
 **Do only this:**
+
 1. Inspect existing `adminExists()`, `adminSetup()`, `requireAdmin()`, `register()` and session utilities; reuse instead of creating parallel auth logic.
 2. First admin setup must show only when no admin account is present in this browser's stored data. Validate name, normalized unique email, password/confirmation and demo setup step. Do not display setup key to users.
 3. After first admin creation, normal UI must refuse subsequent admin creation. Registration always creates `customer`, regardless of forged UI role value; remove role changing/promotions from UI if any.
@@ -108,6 +111,7 @@ Yes, proceed with Part 01 ONLY. First review docs/implementation-progress.md and
 **Relevant files:** `index.html`, `products.html`, `categories.html`, `shop.html`, `sellers.html`, `js/data.js`, `js/main.js`, `js/storage.js` (read/lookup methods), `js/ui.js`, relevant CSS.
 
 **Do only this:**
+
 1. Ensure correct storefront routes, nav, featured products, functional product links and seller/shop mapping.
 2. Search/filter/sort combinations work with coherent empty states; categories and seller filters use actual seed/override data, not invented catalogs.
 3. Product details show accurate effective price, image fallback, stock, seller and availability. Handle missing/archived product links gracefully.
@@ -128,6 +132,7 @@ Yes, proceed with Part 01 ONLY. First review docs/implementation-progress.md and
 **Relevant files:** `js/main.js`, `js/storage.js`, `js/ui.js`, applicable product/cart/checkout markup and styles, `tests/smoke.js`.
 
 **Do only this:**
+
 1. Trace cart and wishlist localStorage keys and guest/customer policy before changing. Keep customer isolation and avoid losing guest cart data without explaining a deliberate policy.
 2. Cart add/update/remove operates on product IDs, merges duplicates, enforces quantity and effective available stock; reports unavailable items clearly.
 3. Wishlist add/remove reflects persisted per-customer state and accurate UI feedback.
@@ -148,6 +153,7 @@ Yes, proceed with Part 01 ONLY. First review docs/implementation-progress.md and
 **Relevant files:** `orders.html`, `profile.html`, `help.html`, `js/main.js`, `js/auth.js` (existing update methods), `js/storage.js`, `js/ui.js`, styles/tests.
 
 **Do only this:**
+
 1. Display signed-in customer's orders only, with correct saved order snapshots, dates, amounts and status; no other customer's orders in normal UI.
 2. Reflect status updates to orders when they are later changed by admin in the same browser origin; do not infer real shipping progress.
 3. Review existing review functions. Fix write/edit/display rules based on current product/user requirements, with safe text rendering and useful errors; do not invent moderation service.
@@ -168,6 +174,7 @@ Yes, proceed with Part 01 ONLY. First review docs/implementation-progress.md and
 **Relevant files:** `admin.html`, `js/admin.js`, `js/storage.js`, `js/auth.js`, `js/ui.js`, `css/styles.css`, tests.
 
 **Do only this:**
+
 1. **Overview:** calculate counts, local demo sales and recent order activity from actual stored records; mark all metrics as local-demo only where relevant.
 2. **Orders:** search/filter/detail, valid status transitions, visible success/errors and clear effects on customer history. Preserve existing stock/cancellation semantics; do not double-restock.
 3. **Products:** validate create/edit, prices/stock, image fallbacks; prefer archive/restore for products referenced by historical orders; maintain product IDs and overrides.
@@ -190,6 +197,7 @@ Yes, proceed with Part 01 ONLY. First review docs/implementation-progress.md and
 **Relevant files:** `css/styles.css`, `js/ui.js`, all HTML pages as needed, minimal related feature scripts, tests/progress.
 
 **Do only this:**
+
 1. Preserve StallFree’s colors and visual style; unify spacing, headings, buttons, form labels, loading/error states and feedback.
 2. Test and fix 320px+ mobile, tablet and desktop layouts. Check nav overflow, form usability, dialogs and horizontal scrolling.
 3. Add meaningful keyboard/focus behavior, alt text, labels, contrast improvements and reduced-motion handling where relevant.
@@ -211,6 +219,7 @@ Yes, proceed with Part 01 ONLY. First review docs/implementation-progress.md and
 **Relevant files:** `tests/*`, `README.md`, `docs/implementation-progress.md`, all functionality as needed for targeted bug fixes.
 
 **Do only this:**
+
 1. Run full automated checks and documented manual checks for visitor, customer A, customer B, sole admin, account isolation, cart, checkout, order status, product/shop edits and sign out.
 2. Re-test against both fresh browser data and existing/migrated demo data; do NOT purge real current demo data without user authorization.
 3. Fix P0/P1 blocking bugs revealed by tests, and track P2 optional polish as backlog. Re-run related tests after each fix.
@@ -223,7 +232,6 @@ Yes, proceed with Part 01 ONLY. First review docs/implementation-progress.md and
 **End question:** Part 08 complete. All planned parts are finished. Would you like a separate optional enhancements plan? (yes/no)
 
 ---
-
 
 ## Mandatory stop instruction (repeat to OpenCode if needed)
 
