@@ -32,8 +32,12 @@
   --shadow: 0 2px 10px rgba(44, 33, 26, 0.07);
   --shadow-lg: 0 18px 40px rgba(44, 33, 26, 0.14);
 
-  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+  --font-body:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --font-display:
+    "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    "Times New Roman", serif;
 
   --header-h: 116px;
 }
@@ -191,7 +195,9 @@ h3 {
   border-radius: 999px;
   cursor: pointer;
   color: var(--ink);
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 
 .icon-btn:hover {
@@ -240,7 +246,9 @@ h3 {
 
 .topbar-links a {
   opacity: 0.8;
-  transition: opacity 0.15s, color 0.15s;
+  transition:
+    opacity 0.15s,
+    color 0.15s;
 }
 
 .topbar-links a:hover,
@@ -316,7 +324,10 @@ h3 {
   background: #f4eee7;
   font-size: 0.95rem;
   color: var(--text);
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    box-shadow 0.15s;
 }
 
 .search-input::placeholder {
@@ -343,7 +354,9 @@ h3 {
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: background 0.15s, transform 0.15s;
+  transition:
+    background 0.15s,
+    transform 0.15s;
 }
 
 .search-btn:hover {
@@ -560,7 +573,9 @@ h3 {
   padding: 6px 12px;
   border-radius: 999px;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .cat-link:hover {
@@ -587,7 +602,11 @@ h3 {
   font-size: 0.92rem;
   font-family: inherit;
   line-height: 1.2;
-  transition: background 0.15s, border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.1s,
+    box-shadow 0.15s;
 }
 
 .btn:active {
@@ -771,7 +790,11 @@ h3 {
   gap: 28px;
   align-items: center;
   background:
-    radial-gradient(1000px 400px at 12% 10%, rgba(255, 255, 255, 0.28), transparent 60%),
+    radial-gradient(
+      1000px 400px at 12% 10%,
+      rgba(255, 255, 255, 0.28),
+      transparent 60%
+    ),
     linear-gradient(135deg, #ff6a2b 0%, #ff5a1f 45%, #e0430c 100%);
   color: #fff;
   border-radius: 26px;
@@ -782,7 +805,7 @@ h3 {
 }
 
 .hero::after {
-  content: '';
+  content: "";
   position: absolute;
   right: -80px;
   top: -80px;
@@ -986,7 +1009,9 @@ h3 {
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: transform 0.15s, background 0.15s;
+  transition:
+    transform 0.15s,
+    background 0.15s;
 }
 
 .rail-btn:hover {
@@ -1022,7 +1047,10 @@ h3 {
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .card:hover {
@@ -1070,7 +1098,9 @@ h3 {
   object-fit: cover;
   opacity: 0;
   transform: scale(1.01);
-  transition: opacity 0.35s ease, transform 0.4s ease;
+  transition:
+    opacity 0.35s ease,
+    transform 0.4s ease;
 }
 
 .pc-media img.is-loaded {
@@ -1123,7 +1153,10 @@ h3 {
   place-items: center;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.15s, color 0.15s, background 0.15s;
+  transition:
+    transform 0.15s,
+    color 0.15s,
+    background 0.15s;
 }
 
 .pc-fav:hover {
@@ -1145,7 +1178,10 @@ h3 {
   place-items: center;
   cursor: pointer;
   color: var(--ink);
-  transition: color 0.15s, border-color 0.15s, transform 0.15s;
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    transform 0.15s;
 }
 
 .pc-fav-inline:hover {
@@ -1174,7 +1210,9 @@ h3 {
   cursor: pointer;
   opacity: 0;
   transform: translateY(8px);
-  transition: opacity 0.18s, transform 0.18s;
+  transition:
+    opacity 0.18s,
+    transform 0.18s;
 }
 
 .product-card:hover .pc-quick {
@@ -1317,7 +1355,9 @@ h3 {
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.18s, box-shadow 0.18s;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
 }
 
 .cat-tile:hover {
@@ -1332,7 +1372,9 @@ h3 {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 0.35s, transform 0.4s;
+  transition:
+    opacity 0.35s,
+    transform 0.4s;
 }
 
 .cat-tile img.is-loaded {
@@ -1346,7 +1388,12 @@ h3 {
 .cat-tile-veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(20, 12, 8, 0.82) 0%, rgba(20, 12, 8, 0.15) 55%, rgba(20, 12, 8, 0.05) 100%);
+  background: linear-gradient(
+    to top,
+    rgba(20, 12, 8, 0.82) 0%,
+    rgba(20, 12, 8, 0.15) 55%,
+    rgba(20, 12, 8, 0.05) 100%
+  );
 }
 
 .cat-tile-text {
@@ -1386,7 +1433,9 @@ h3 {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 0.35s, transform 0.4s;
+  transition:
+    opacity 0.35s,
+    transform 0.4s;
 }
 
 .cat-card-tile img.is-loaded {
@@ -1572,7 +1621,7 @@ h3 {
 }
 
 .breadcrumb li:not(:last-child)::after {
-  content: '/';
+  content: "/";
   margin-left: 6px;
   color: var(--border-strong);
 }
@@ -1582,7 +1631,7 @@ h3 {
   text-decoration: underline;
 }
 
-.breadcrumb [aria-current='page'] {
+.breadcrumb [aria-current="page"] {
   color: var(--ink);
   font-weight: 600;
 }
@@ -1701,7 +1750,9 @@ h3 {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 0.4s, transform 0.5s;
+  transition:
+    opacity 0.4s,
+    transform 0.5s;
 }
 
 .pdp-image img.is-loaded {
@@ -1958,7 +2009,9 @@ h3 {
   font-size: 1.9rem;
   line-height: 1;
   color: #e3d5c9;
-  transition: color 0.12s, transform 0.12s;
+  transition:
+    color 0.12s,
+    transform 0.12s;
 }
 
 .star-option input {
@@ -2081,7 +2134,10 @@ h3 {
   font-size: 0.85rem;
   font-weight: 650;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .tab:hover {
@@ -2156,7 +2212,6 @@ h3 {
   opacity: 0.4;
   cursor: not-allowed;
 }
-
 
 .cart-thumb {
   position: relative;
@@ -2308,7 +2363,9 @@ h3 {
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 600;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .payment-opt:hover {
@@ -2342,7 +2399,6 @@ h3 {
 .co-phone-switch {
   margin-top: 6px;
 }
-
 
 /* --- orders --- */
 .order-card {
@@ -2492,7 +2548,9 @@ h3 {
   font-size: 0.94rem;
   background: var(--surface);
   color: var(--text);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .input:focus,
@@ -2503,8 +2561,8 @@ h3 {
   box-shadow: 0 0 0 4px rgba(255, 90, 31, 0.13);
 }
 
-.input[aria-invalid='true'],
-.textarea[aria-invalid='true'] {
+.input[aria-invalid="true"],
+.textarea[aria-invalid="true"] {
   border-color: var(--danger);
 }
 
@@ -2598,7 +2656,9 @@ h3 {
   box-shadow: var(--shadow-lg);
   opacity: 0;
   transform: translateY(14px);
-  transition: opacity 0.25s, transform 0.25s;
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
   max-width: 100%;
 }
 
@@ -2775,7 +2835,10 @@ h3 {
   opacity: 0;
   visibility: hidden;
   transform: translateY(12px);
-  transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s,
+    visibility 0.2s;
 }
 
 .back-top.visible {
@@ -2887,13 +2950,13 @@ h3 {
 }
 
 .faq-item summary::after {
-  content: '+';
+  content: "+";
   color: var(--primary);
   font-size: 1.2rem;
 }
 
 .faq-item[open] summary::after {
-  content: '–';
+  content: "–";
 }
 
 .faq-item p {
@@ -3097,7 +3160,6 @@ h3 {
   white-space: nowrap;
 }
 
-
 /* =====================================================================
    Iteration 2 — Etsy-informed refresh
    Listing cards frame themselves with the photo, not a box.
@@ -3121,7 +3183,9 @@ h3 {
 .pc-media {
   border-radius: 18px;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.18s ease, transform 0.18s ease;
+  transition:
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
 }
 
 .product-card:hover .pc-media {
@@ -3178,7 +3242,10 @@ h3 {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
-  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease;
 }
 
 .occ-tile:hover {
@@ -3224,7 +3291,9 @@ h3 {
   color: #fff;
   background: var(--ink);
   box-shadow: var(--shadow-sm);
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
 .price-tile:hover {
@@ -3358,7 +3427,10 @@ h3 {
   font-weight: 650;
   white-space: nowrap;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .pilter:hover {
@@ -3410,7 +3482,10 @@ h3 {
   font-size: 0.9rem;
   font-weight: 650;
   text-decoration: none;
-  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    transform 0.15s,
+    box-shadow 0.15s;
 }
 
 .chip-related svg {
@@ -3430,8 +3505,8 @@ h3 {
 .pdp {
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) 300px;
   grid-template-areas:
-    'gallery summary buybox'
-    'gallery detail buybox';
+    "gallery summary buybox"
+    "gallery detail buybox";
   gap: 22px 28px;
   align-items: start;
 }
@@ -3478,7 +3553,9 @@ h3 {
   overflow: hidden;
   background: var(--bg-deep);
   cursor: pointer;
-  transition: border-color 0.15s, transform 0.15s;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
 }
 
 .pdp-thumb img {
@@ -3822,9 +3899,9 @@ h3 {
   .pdp {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas:
-      'gallery summary'
-      'buybox buybox'
-      'detail detail';
+      "gallery summary"
+      "buybox buybox"
+      "detail detail";
     gap: 22px;
   }
 
@@ -3849,10 +3926,10 @@ h3 {
   .pdp {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      'gallery'
-      'summary'
-      'buybox'
-      'detail';
+      "gallery"
+      "summary"
+      "buybox"
+      "detail";
   }
 
   .pdp-gallery {
@@ -4067,7 +4144,7 @@ h3 {
 }
 
 .track-step::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 13px;
   top: 30px;
@@ -4114,7 +4191,7 @@ h3 {
 }
 
 .track-step.active .track-dot::after {
-  content: '';
+  content: "";
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -4330,7 +4407,7 @@ h3 {
   transition: transform 0.2s ease;
 }
 
-.settings-toggle[aria-expanded='true'] .settings-chevron {
+.settings-toggle[aria-expanded="true"] .settings-chevron {
   transform: rotate(180deg);
 }
 
@@ -4917,5 +4994,968 @@ a.admin-mini-row:hover {
   .admin-toolbar .input-search,
   .admin-toolbar .select {
     flex: 1 1 100%;
+  }
+}
+
+/* =====================================================
+   STALLFREE — WARM BOUTIQUE DESIGN REFRESH
+   Visual styling only: preserves existing content,
+   layout structure, navigation, and JS functionality.
+   ===================================================== */
+
+/* 1. UPDATED COLOR PALETTE */
+
+:root {
+  --bg: #fff6ee;
+  --bg-deep: #ffeadb;
+  --surface: #fffaf6;
+
+  --ink: #3f1b12;
+  --text: #503025;
+  --muted: #86695a;
+
+  --primary: #e94d19;
+  --primary-dark: #ae3414;
+  --primary-soft: #fff0e5;
+
+  --accent: #b7663f;
+  --accent-soft: #fff0e6;
+
+  --border: #efdbc9;
+  --border-strong: #e4bda3;
+
+  --radius: 20px;
+  --radius-sm: 13px;
+
+  --shadow-sm: 0 3px 10px rgba(91, 40, 20, 0.05);
+  --shadow: 0 10px 25px rgba(91, 40, 20, 0.08);
+  --shadow-lg: 0 20px 45px rgba(91, 40, 20, 0.14);
+}
+
+/* 2. SOFT PEACH PAGE BACKGROUND */
+
+body {
+  background:
+    radial-gradient(circle at 0% 8%, rgba(255, 162, 97, 0.22), transparent 32%),
+    radial-gradient(
+      circle at 100% 24%,
+      rgba(255, 197, 156, 0.28),
+      transparent 32%
+    ),
+    linear-gradient(180deg, #fff1e5 0%, #fff8f2 42%, #fffaf6 100%);
+
+  color: var(--text);
+  background-attachment: fixed;
+}
+
+/* 3. SUBTLE DECORATIVE BACKGROUND */
+
+body::before {
+  content: "";
+  position: fixed;
+  width: 440px;
+  height: 440px;
+  top: -210px;
+  right: -180px;
+  border-radius: 50%;
+  background: rgba(255, 171, 107, 0.12);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  width: 330px;
+  height: 330px;
+  left: -180px;
+  bottom: -140px;
+  border-radius: 50%;
+  background: rgba(235, 122, 66, 0.1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 4. ELEGANT WEBSITE HEADER */
+
+.site-header {
+  background: rgba(255, 250, 245, 0.97);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 5px 22px rgba(79, 30, 12, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+.logo-text {
+  color: #622515;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.logo-text em {
+  color: var(--primary);
+}
+
+.header-cats {
+  background: #fff8f1;
+  border-top: 1px solid var(--border);
+}
+
+.cat-link {
+  color: #603b2d;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.cat-link:hover {
+  background: #ffe9db;
+  color: var(--primary-dark);
+}
+
+.cat-link.active {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  box-shadow: inset 0 -3px var(--primary);
+}
+
+/* 5. SOFTER SEARCH BAR */
+
+.search-input {
+  background: #fff0e5;
+  border: 1px solid #eacbb5;
+  border-radius: 999px;
+  color: var(--text);
+}
+
+.search-input:focus {
+  background: #fffaf6;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(233, 77, 25, 0.1);
+}
+
+.search-btn {
+  background: var(--primary);
+  box-shadow: 0 4px 12px rgba(233, 77, 25, 0.2);
+}
+
+/* 6. HOMEPAGE HERO */
+
+.hero {
+  background:
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(255, 255, 255, 0.16),
+      transparent 40%
+    ),
+    linear-gradient(125deg, #f9bb90 0%, #f18c59 45%, #df622d 100%);
+
+  border: 1px solid #efb58f;
+  border-radius: 28px;
+  box-shadow: 0 18px 38px rgba(171, 83, 36, 0.15);
+}
+
+.hero h1 {
+  color: #512015;
+  letter-spacing: -0.035em;
+}
+
+.hero p {
+  color: #593023;
+  opacity: 1;
+}
+
+.hero-eyebrow {
+  background: rgba(255, 250, 244, 0.65);
+  color: #743219;
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.hero-pills a {
+  background: rgba(255, 250, 245, 0.72);
+  color: #743219;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.hero-pills a:hover {
+  background: #fffaf6;
+}
+
+.hero-art .hero-tile {
+  border: 3px solid rgba(255, 250, 245, 0.75);
+  border-radius: 20px;
+  box-shadow: 0 12px 26px rgba(95, 35, 14, 0.16);
+}
+
+.hero-search {
+  background: #fffaf6;
+  box-shadow: 0 10px 25px rgba(95, 35, 14, 0.15);
+}
+
+/* 7. PRODUCT CARDS */
+
+.product-card {
+  background: #fffaf6;
+  border: 1px solid #eedacb;
+  border-radius: 22px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  border-color: #e7b99c;
+  box-shadow: var(--shadow-lg);
+}
+
+.pc-body {
+  padding: 16px;
+  gap: 7px;
+}
+
+.pc-title {
+  color: #492218;
+  font-weight: 700;
+}
+
+.pc-shop-link:hover,
+.pc-title a:hover {
+  color: var(--primary-dark);
+}
+
+.price {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.pc-fav {
+  background: rgba(255, 250, 245, 0.96);
+  color: #6a3829;
+  box-shadow: 0 4px 12px rgba(71, 30, 13, 0.12);
+}
+
+.pc-fav:hover,
+.pc-fav.is-wished {
+  color: var(--primary);
+}
+
+.pc-quick {
+  background: rgba(255, 250, 245, 0.97);
+  color: #57291c;
+}
+
+.pc-quick:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* 8. CATEGORY CARDS */
+
+.cat-tile {
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+}
+
+.cat-tile:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.cat-tile-veil {
+  background: linear-gradient(
+    180deg,
+    transparent 20%,
+    rgba(65, 23, 12, 0.82) 100%
+  );
+}
+
+/* 9. SHOP CARDS */
+
+.shop-card {
+  background: #fffaf6;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.shop-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow);
+}
+
+.shop-card-body {
+  background: #fffaf6;
+}
+
+.shop-card-foot {
+  border-top-color: var(--border);
+}
+
+/* 10. GENERAL CARDS AND PANELS */
+
+.card {
+  background: #fffaf6;
+  border-color: var(--border);
+  border-radius: 20px;
+}
+
+.card:hover {
+  box-shadow: var(--shadow);
+}
+
+.section-header h2,
+.page-head h1 {
+  color: #582317;
+  letter-spacing: -0.025em;
+}
+
+/* 11. BUTTONS */
+
+.btn-primary {
+  background: linear-gradient(135deg, #f26a2e, #e44914);
+  color: white;
+  box-shadow: 0 7px 18px rgba(228, 73, 20, 0.2);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #e7571d, #ba3712);
+  box-shadow: 0 10px 24px rgba(228, 73, 20, 0.28);
+}
+
+.btn-outline {
+  background: #fffaf6;
+  color: #6e3423;
+  border-color: #e5c4b1;
+}
+
+.btn-outline:hover {
+  background: #fff0e5;
+  border-color: var(--primary);
+  color: var(--primary-dark);
+}
+
+/* 12. INPUTS AND FORMS */
+
+.input,
+.select,
+.textarea {
+  background: #fffdfb;
+  border-color: #e9ccba;
+  border-radius: 13px;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(233, 77, 25, 0.1);
+}
+
+/* 13. AUTHENTICATION */
+
+.auth-card {
+  background: #fffaf6;
+  border: 1px solid #ecd5c5;
+  border-radius: 24px;
+  box-shadow: 0 16px 38px rgba(103, 45, 21, 0.09);
+}
+
+.auth-title {
+  color: #582317;
+}
+
+.account-menu {
+  background: #fffaf6;
+  border-color: #efdbc9;
+  border-radius: 18px;
+}
+
+/* 14. ADMIN DASHBOARD */
+
+body[data-page="admin"] {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 174, 119, 0.22),
+      transparent 35%
+    ),
+    linear-gradient(180deg, #fff2e8, #fffaf6);
+}
+
+body[data-page="admin"] .admin-card,
+body[data-page="admin"] .stat-card {
+  background: #fffaf6;
+  border-color: #efdbc9;
+}
+
+body[data-page="admin"] .admin-tabs {
+  background: #fff3e9;
+  border-radius: 16px;
+}
+
+/* 15. MOBILE OPTIMIZATION */
+
+@media (max-width: 768px) {
+  body {
+    background: #fff7f0;
+    background-attachment: scroll;
+  }
+
+  body::before,
+  body::after {
+    display: none;
+  }
+
+  .hero {
+    border-radius: 20px;
+    padding: 24px;
+  }
+
+  .hero-art .hero-tile {
+    border-radius: 14px;
+  }
+
+  .product-card,
+  .shop-card,
+  .card {
+    border-radius: 16px;
+  }
+
+  .cat-link {
+    font-size: 0.84rem;
+  }
+}
+
+/* 16. REDUCED MOTION */
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card,
+  .cat-tile,
+  .btn,
+  .pc-media img {
+    transition: none;
+  }
+}
+
+/* =====================================================
+   STALLFREE — WARM BOUTIQUE DESIGN REFRESH
+   Visual styling only: preserves existing content,
+   layout structure, navigation, and JS functionality.
+   ===================================================== */
+
+/* 1. UPDATED COLOR PALETTE */
+
+:root {
+  --bg: #fff6ee;
+  --bg-deep: #ffeadb;
+  --surface: #fffaf6;
+
+  --ink: #3f1b12;
+  --text: #503025;
+  --muted: #86695a;
+
+  --primary: #e94d19;
+  --primary-dark: #ae3414;
+  --primary-soft: #fff0e5;
+
+  --accent: #b7663f;
+  --accent-soft: #fff0e6;
+
+  --border: #efdbc9;
+  --border-strong: #e4bda3;
+
+  --radius: 20px;
+  --radius-sm: 13px;
+
+  --shadow-sm: 0 3px 10px rgba(91, 40, 20, 0.05);
+  --shadow: 0 10px 25px rgba(91, 40, 20, 0.08);
+  --shadow-lg: 0 20px 45px rgba(91, 40, 20, 0.14);
+}
+
+/* 2. SOFT PEACH PAGE BACKGROUND */
+
+body {
+  background:
+    radial-gradient(circle at 0% 8%, rgba(255, 162, 97, 0.22), transparent 32%),
+    radial-gradient(
+      circle at 100% 24%,
+      rgba(255, 197, 156, 0.28),
+      transparent 32%
+    ),
+    linear-gradient(180deg, #fff1e5 0%, #fff8f2 42%, #fffaf6 100%);
+
+  color: var(--text);
+  background-attachment: fixed;
+}
+
+/* 3. SUBTLE DECORATIVE BACKGROUND */
+
+body::before {
+  content: "";
+  position: fixed;
+  width: 440px;
+  height: 440px;
+  top: -210px;
+  right: -180px;
+  border-radius: 50%;
+  background: rgba(255, 171, 107, 0.12);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  width: 330px;
+  height: 330px;
+  left: -180px;
+  bottom: -140px;
+  border-radius: 50%;
+  background: rgba(235, 122, 66, 0.1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 4. ELEGANT WEBSITE HEADER */
+
+.site-header {
+  background: rgba(255, 250, 245, 0.97);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 5px 22px rgba(79, 30, 12, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+.logo-text {
+  color: #622515;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.logo-text em {
+  color: var(--primary);
+}
+
+.header-cats {
+  background: #fff8f1;
+  border-top: 1px solid var(--border);
+}
+
+.cat-link {
+  color: #603b2d;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.cat-link:hover {
+  background: #ffe9db;
+  color: var(--primary-dark);
+}
+
+.cat-link.active {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  box-shadow: inset 0 -3px var(--primary);
+}
+
+/* 5. SOFTER SEARCH BAR */
+
+.search-input {
+  background: #fff0e5;
+  border: 1px solid #eacbb5;
+  border-radius: 999px;
+  color: var(--text);
+}
+
+.search-input:focus {
+  background: #fffaf6;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(233, 77, 25, 0.1);
+}
+
+.search-btn {
+  background: var(--primary);
+  box-shadow: 0 4px 12px rgba(233, 77, 25, 0.2);
+}
+
+/* 6. HOMEPAGE HERO */
+
+.hero {
+  background:
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(255, 255, 255, 0.16),
+      transparent 40%
+    ),
+    linear-gradient(125deg, #f9bb90 0%, #f18c59 45%, #df622d 100%);
+
+  border: 1px solid #efb58f;
+  border-radius: 28px;
+  box-shadow: 0 18px 38px rgba(171, 83, 36, 0.15);
+}
+
+.hero h1 {
+  color: #512015;
+  letter-spacing: -0.035em;
+}
+
+.hero p {
+  color: #593023;
+  opacity: 1;
+}
+
+.hero-eyebrow {
+  background: rgba(255, 250, 244, 0.65);
+  color: #743219;
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.hero-pills a {
+  background: rgba(255, 250, 245, 0.72);
+  color: #743219;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.hero-pills a:hover {
+  background: #fffaf6;
+}
+
+.hero-art .hero-tile {
+  border: 3px solid rgba(255, 250, 245, 0.75);
+  border-radius: 20px;
+  box-shadow: 0 12px 26px rgba(95, 35, 14, 0.16);
+}
+
+.hero-search {
+  background: #fffaf6;
+  box-shadow: 0 10px 25px rgba(95, 35, 14, 0.15);
+}
+
+/* 7. PRODUCT CARDS */
+
+.product-card {
+  background: #fffaf6;
+  border: 1px solid #eedacb;
+  border-radius: 22px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  border-color: #e7b99c;
+  box-shadow: var(--shadow-lg);
+}
+
+.pc-body {
+  padding: 16px;
+  gap: 7px;
+}
+
+.pc-title {
+  color: #492218;
+  font-weight: 700;
+}
+
+.pc-shop-link:hover,
+.pc-title a:hover {
+  color: var(--primary-dark);
+}
+
+.price {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.pc-fav {
+  background: rgba(255, 250, 245, 0.96);
+  color: #6a3829;
+  box-shadow: 0 4px 12px rgba(71, 30, 13, 0.12);
+}
+
+.pc-fav:hover,
+.pc-fav.is-wished {
+  color: var(--primary);
+}
+
+.pc-quick {
+  background: rgba(255, 250, 245, 0.97);
+  color: #57291c;
+}
+
+.pc-quick:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* 8. CATEGORY CARDS */
+
+.cat-tile {
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+}
+
+.cat-tile:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.cat-tile-veil {
+  background: linear-gradient(
+    180deg,
+    transparent 20%,
+    rgba(65, 23, 12, 0.82) 100%
+  );
+}
+
+/* 9. SHOP CARDS */
+
+.shop-card {
+  background: #fffaf6;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.shop-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow);
+}
+
+.shop-card-body {
+  background: #fffaf6;
+}
+
+.shop-card-foot {
+  border-top-color: var(--border);
+}
+
+/* 10. GENERAL CARDS AND PANELS */
+
+.card {
+  background: #fffaf6;
+  border-color: var(--border);
+  border-radius: 20px;
+}
+
+.card:hover {
+  box-shadow: var(--shadow);
+}
+
+.section-header h2,
+.page-head h1 {
+  color: #582317;
+  letter-spacing: -0.025em;
+}
+
+/* 11. BUTTONS */
+
+.btn-primary {
+  background: linear-gradient(135deg, #f26a2e, #e44914);
+  color: white;
+  box-shadow: 0 7px 18px rgba(228, 73, 20, 0.2);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #e7571d, #ba3712);
+  box-shadow: 0 10px 24px rgba(228, 73, 20, 0.28);
+}
+
+.btn-outline {
+  background: #fffaf6;
+  color: #6e3423;
+  border-color: #e5c4b1;
+}
+
+.btn-outline:hover {
+  background: #fff0e5;
+  border-color: var(--primary);
+  color: var(--primary-dark);
+}
+
+/* 12. INPUTS AND FORMS */
+
+.input,
+.select,
+.textarea {
+  background: #fffdfb;
+  border-color: #e9ccba;
+  border-radius: 13px;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(233, 77, 25, 0.1);
+}
+
+/* 13. AUTHENTICATION */
+
+.auth-card {
+  background: #fffaf6;
+  border: 1px solid #ecd5c5;
+  border-radius: 24px;
+  box-shadow: 0 16px 38px rgba(103, 45, 21, 0.09);
+}
+
+.auth-title {
+  color: #582317;
+}
+
+.account-menu {
+  background: #fffaf6;
+  border-color: #efdbc9;
+  border-radius: 18px;
+}
+
+/* 14. ADMIN DASHBOARD */
+
+body[data-page="admin"] {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 174, 119, 0.22),
+      transparent 35%
+    ),
+    linear-gradient(180deg, #fff2e8, #fffaf6);
+}
+
+body[data-page="admin"] .admin-card,
+body[data-page="admin"] .stat-card {
+  background: #fffaf6;
+  border-color: #efdbc9;
+}
+
+body[data-page="admin"] .admin-tabs {
+  background: #fff3e9;
+  border-radius: 16px;
+}
+
+/* 15. MOBILE OPTIMIZATION */
+
+@media (max-width: 768px) {
+  body {
+    background: #fff7f0;
+    background-attachment: scroll;
+  }
+
+  body::before,
+  body::after {
+    display: none;
+  }
+
+  .hero {
+    border-radius: 20px;
+    padding: 24px;
+  }
+
+  .hero-art .hero-tile {
+    border-radius: 14px;
+  }
+
+  .product-card,
+  .shop-card,
+  .card {
+    border-radius: 16px;
+  }
+
+  .cat-link {
+    font-size: 0.84rem;
+  }
+}
+
+/* 16. REDUCED MOTION */
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card,
+  .cat-tile,
+  .btn,
+  .pc-media img {
+    transition: none;
+  }
+}
+
+/* ============================================
+   STALLFREE — VISIBLE BACKGROUND DESIGN
+   ============================================ */
+
+/* Stronger warm orange and peach background */
+body:not([data-page="admin"]) {
+  background-color: #f9bc91 !important;
+
+  background-image:
+    radial-gradient(
+      circle at 10% 15%,
+      rgba(255, 255, 255, 0.65) 0 5px,
+      transparent 6px
+    ),
+    radial-gradient(
+      circle at 85% 35%,
+      rgba(255, 255, 255, 0.45) 0 4px,
+      transparent 5px
+    ),
+    radial-gradient(ellipse at 5% 10%, #ffddc3 0%, transparent 42%),
+    radial-gradient(ellipse at 95% 65%, #f78d58 0%, transparent 45%),
+    linear-gradient(135deg, #ffc69e, #f9ac78 45%, #ffd9ba) !important;
+
+  background-size:
+    100px 100px,
+    140px 140px,
+    100% 100%,
+    100% 100%,
+    100% 100% !important;
+
+  background-attachment: scroll !important;
+}
+
+/* Cream-colored content areas */
+body:not([data-page="admin"]) main.container {
+  background: rgba(255, 250, 245, 0.94);
+  padding: 24px;
+  border-radius: 28px;
+  box-shadow: 0 16px 45px rgba(119, 55, 25, 0.12);
+  margin-top: 20px;
+  margin-bottom: 28px;
+}
+
+/* More noticeable decorative cards */
+body:not([data-page="admin"]) .product-card,
+body:not([data-page="admin"]) .shop-card,
+body:not([data-page="admin"]) .cat-card {
+  background: #fff9f3;
+  border: 1px solid #e9b995;
+  box-shadow: 0 8px 22px rgba(126, 60, 29, 0.12);
+}
+
+/* Decorative orange accents for section headings */
+.section-header h2::after {
+  background: linear-gradient(90deg, #e84919, #f79352, #ffd1a5) !important;
+
+  width: 95px;
+  height: 4px;
+}
+
+/* Softer mobile layout */
+@media (max-width: 768px) {
+  body:not([data-page="admin"]) main.container {
+    width: calc(100% - 20px);
+    padding: 14px;
+    border-radius: 18px;
   }
 }

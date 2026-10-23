@@ -307,67 +307,10 @@ function adminLowStock() {
 
 function renderAdminOverview(panel) {
   const orders = adminOrdersNewestFirst();
-  const delivered = orders.filter(
-    (o) => normalizeOrderStatus(o) === "delivered",
-  );
-  const pending = orders.filter((o) => {
-    const m = statusMeta(o.status);
-    return m.flow > 0 && m.id !== "delivered";
-  });
-  const revenue = delivered.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
-  const customers = listAccounts().filter((a) => a.role !== "admin").length;
-  const liveProducts = dedupeById(products).filter(isListable).length;
-  const shops = sellers.length;
   const low = adminLowStock();
   const recent = orders.slice(0, 5);
 
   panel.innerHTML = `
-    <div class="admin-overview-head">
-      <div>
-        <h2>Store snapshot</h2>
-        <p class="muted small">Calculated from orders and catalogue records saved in this browser.</p>
-      </div>
-      ${adminDemoBadge()}
-    </div>
-
-    <div class="stats-grid">
-      <div class="card stat-card">
-        <div class="stat">${orders.length}</div>
-        <div class="muted">Orders total (demo)</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat">${pending.length}</div>
-        <div class="muted">Awaiting delivery (demo)</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat">${formatPrice(revenue)}</div>
-        <div class="muted">Simulated delivered revenue</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat">${liveProducts}</div>
-        <div class="muted">Live products</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat">${shops}</div>
-        <div class="muted">Catalogue shops</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat">${customers}</div>
-        <div class="muted">Customer accounts (local)</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat">${low.length}</div>
-        <div class="muted">Low-stock listings</div>
-      </div>
-    </div>
-
-    <div class="banner demo-banner" role="note">
-      <b>Simulation only.</b> Every number on this page comes from demo orders, catalogue
-      edits and accounts stored in this browser. Revenue counts only orders whose current
-      status is <b>Delivered</b>; cancelled and in-progress orders are excluded. No real
-      sale, payment, shipment or seller payout occurred.
-    </div>
-
     <div class="admin-toolbar admin-quick-actions">
       <button type="button" class="btn btn-primary btn-sm" data-admin-new-product>+ Add product</button>
       <button type="button" class="btn btn-outline btn-sm" data-goto-tab="orders">Review pending orders</button>
@@ -425,16 +368,7 @@ function renderAdminOverview(panel) {
       </section>
     </div>
 
-    <section class="card admin-card admin-backup">
-      <div class="admin-card-head">
-        <h3>Demo data backup</h3>
-      </div>
-      <p class="muted small">
-        Download a JSON snapshot of local demo orders, catalogue overrides and shop edits.
-        Account credentials, password hashes and sessions are never exported. Importing
-        replaces those demo records only after you confirm; accounts stay untouched.
-      </p>
-    </section>`;
+`;
 
   panel.querySelectorAll("[data-goto-tab]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -454,8 +388,6 @@ function renderAdminOverview(panel) {
       openAdminOrderDetail(button.dataset.overviewOrder);
     });
   });
-
-  bindDemoBackupControls(panel);
 }
 
 /* ---------------- Demo backup controls ---------------- */
