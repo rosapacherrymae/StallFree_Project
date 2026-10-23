@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # StallFree
 
 StallFree is a frontend-only marketplace prototype for local, handmade, and small-shop
@@ -312,12 +311,3 @@ Original StallFree coursework team:
 - TAN, CIARA DAWN
 - GILHANG, DEBBIE MARIZ
 - DERDER, IZZA MAY
-=======
-ROSAPA, CHERRY MAE
-TAN, CIARA DAWN
-GILHANG, DEBBIE MARIZ
-<<<<<<< HEAD
-=======
-DERDER, IZZA MAY
->>>>>>> d6ee3184ce4c2731874e6e05343df0ff4b122240
->>>>>>> 5222d91c3c8d72e9c04218110561e0376edb3bb5
