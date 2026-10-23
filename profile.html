@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile | StallFree</title>
+    <meta name="description" content="Manage your details and review your buying activity." />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23ff5a1f'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Georgia'>S</text></svg>"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body data-page="profile">
+    <header id="site-header"></header>
+
+    <main class="container">
+      <div class="page-head">
+        <div>
+          <h1>Your profile</h1>
+          <p class="tagline">
+            Your details auto-fill at checkout. Everything is stored only in this
+            browser.
+          </p>
+        </div>
+        <a href="orders.html" class="btn btn-outline">Your orders</a>
+      </div>
+
+      <div class="banner banner-success hidden" id="profile-banner"></div>
+
+      <div class="profile-layout">
+        <div class="profile-side">
+        <form class="card profile-card" id="profile-form" novalidate>
+          <h3 style="margin-bottom: 14px">Your details</h3>
+
+          <div class="banner hidden" id="profile-error" style="background: var(--danger-soft); color: var(--danger)">
+            First name is required.
+          </div>
+
+          <div class="form-group">
+            <label for="p-first">First name *</label>
+            <input type="text" id="p-first" class="input" placeholder="Juan" autocomplete="given-name" />
+          </div>
+
+          <div class="form-group">
+            <label for="p-last">Last name</label>
+            <input type="text" id="p-last" class="input" placeholder="Dela Cruz" autocomplete="family-name" />
+          </div>
+
+          <div class="form-group">
+            <label for="p-email">Account email</label>
+            <input type="email" id="p-email" class="input" autocomplete="email" aria-describedby="p-email-hint" />
+            <p class="field-error hidden" id="p-email-error"></p>
+            <p class="muted small form-hint" id="p-email-hint">
+              Your sign-in email. You can update it if it's not used by another account.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="p-phone">Phone number</label>
+            <input type="tel" id="p-phone" class="input" placeholder="0917 123 4567" autocomplete="tel" />
+          </div>
+
+          <div class="form-group" id="address">
+            <label for="p-address">Delivery address</label>
+            <textarea id="p-address" class="textarea" rows="3" placeholder="House no., street, city" autocomplete="street-address"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Save profile</button>
+
+          <p class="muted small" style="margin-top: 12px">
+            Saved name and address auto-fill when you check out.
+          </p>
+        </form>
+
+        <section class="card settings-card" id="settings">
+          <h3 style="margin-bottom: 6px">
+            <button
+              type="button"
+              class="settings-toggle"
+              id="settings-toggle"
+              aria-expanded="false"
+              aria-controls="settings-panel"
+            >
+              Account settings
+              <svg
+                class="settings-chevron"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+          </h3>
+
+          <div id="settings-panel" class="settings-panel hidden">
+            <p class="muted small" id="settings-account-line" style="margin-bottom: 14px"></p>
+
+            <div id="settings-signed-out" class="hidden">
+              <p class="muted small" style="margin-bottom: 12px">
+                Create an account or sign in to protect this profile with a password. Demo
+                accounts live only in this browser.
+              </p>
+              <div class="settings-actions">
+                <a href="login.html" class="btn btn-outline btn-sm">Sign in</a>
+                <a href="register.html" class="btn btn-primary btn-sm">Create an account</a>
+              </div>
+            </div>
+
+            <form id="password-form" class="hidden" novalidate>
+              <div class="banner hidden" id="password-banner" style="background: var(--success-soft); color: var(--success)"></div>
+              <div class="banner hidden" id="password-error" style="background: var(--danger-soft); color: var(--danger)"></div>
+
+              <div class="form-group">
+                <label for="pw-current">Current password *</label>
+                <input type="password" id="pw-current" class="input" autocomplete="current-password" />
+                <button type="button" class="link-btn pw-toggle" data-toggle-password="pw-current" aria-pressed="false">Show</button>
+              </div>
+              <div class="form-group">
+                <label for="pw-next">New password *</label>
+                <input type="password" id="pw-next" class="input" autocomplete="new-password" />
+                <button type="button" class="link-btn pw-toggle" data-toggle-password="pw-next" aria-pressed="false">Show</button>
+                <p class="muted small form-hint">At least 8 characters, with a letter and a number.</p>
+              </div>
+              <div class="form-group">
+                <label for="pw-confirm">Confirm new password *</label>
+                <input type="password" id="pw-confirm" class="input" autocomplete="new-password" />
+                <button type="button" class="link-btn pw-toggle" data-toggle-password="pw-confirm" aria-pressed="false">Show</button>
+              </div>
+              <button type="submit" class="btn btn-outline btn-block" id="pw-submit">Change password</button>
+            </form>
+          </div>
+        </section>
+        </div>
+
+        <div>
+          <div class="section-header">
+            <h2>Your stats</h2>
+            <a href="wishlist.html" class="link-btn">Saved items →</a>
+          </div>
+
+          <div class="stats-grid">
+            <div class="card stat-card">
+              <div class="stat" id="stat-count">0</div>
+              <div class="muted">Orders placed</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat" id="stat-spent">₱0</div>
+              <div class="muted">Total spent</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat" id="stat-items">0</div>
+              <div class="muted">Items bought</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat" id="stat-wishes">0</div>
+              <div class="muted">Saved items</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat" id="stat-follows">0</div>
+              <div class="muted">Shops followed</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat" id="stat-reviews">0</div>
+              <div class="muted">Reviews written</div>
+            </div>
+          </div>
+
+          <div class="section-header" style="margin-top: 30px">
+            <h2>Recent orders</h2>
+            <a href="orders.html" class="link-btn">See all →</a>
+          </div>
+          <div id="order-history"></div>
+          <div id="history-empty" class="hidden">
+            <div class="empty-state">
+              <h3>No orders yet</h3>
+              <p>When you check out, your orders will show up here.</p>
+              <a href="products.html" class="btn btn-primary" style="margin-top: 16px">Start shopping</a>
+            </div>
+          </div>
+
+          <div class="card" style="padding: 20px; margin-top: 26px">
+            <h3 style="margin-bottom: 6px">Data &amp; privacy</h3>
+            <p class="muted small" style="margin-bottom: 14px">
+              Cart, saved items, orders, reviews, and profile details live in this
+              browser's localStorage. Clearing them cannot be undone.
+            </p>
+            <button type="button" class="btn btn-danger" data-action="clear-data">
+              Delete all local data
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer id="site-footer"></footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
